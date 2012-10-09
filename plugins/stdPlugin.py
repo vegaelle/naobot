@@ -4,6 +4,8 @@ import re
 
 class stdPlugin(object):
 
+    #events = [('pubmsg', {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'})]
+
     def __init__(self, bot, conf):
         self.bot = bot
         self.conf = conf

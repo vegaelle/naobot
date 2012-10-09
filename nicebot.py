@@ -14,30 +14,46 @@ class Nicebot(bot.SingleServerIRCBot):
         self.conf = conf
         bot.SingleServerIRCBot.__init__(self, self.conf['server'], self.conf['nick'], self.conf['fullname'])
         for plugin_name in self.conf['plugins']:
+            self.load_plugin(plugin_name)
+
+    def load_plugin(self, plugin_name):
+        try:
+            importStr = 'from plugins import %s' % plugin_name
+            exec importStr
+            plugin = getattr(sys.modules['plugins.'+plugin_name], plugin_name)
             try:
-                importStr = 'from plugins import %s' % plugin_name
-                exec importStr
-                plugin = getattr(sys.modules['plugins.'+plugin_name], plugin_name)
+                plugin_conf = plugins_conf[plugin_name]
+            except KeyError:
+                plugin_conf = {}
+            self.registered_plugins[plugin_name] = plugin(self, plugin_conf)
+            for e in plugin.events:
                 try:
-                    plugin_conf = plugins_conf[plugin_name]
-                except KeyError:
-                    plugin_conf = {}
-                self.registered_plugins[plugin_name] = plugin(self, plugin_conf)
-                for e in plugin.events:
                     try:
-                        try:
-                            self.events[e[0]]
-                            assert isinstance(self.events[e[0]], dict)
-                        except KeyError:
-                            self.events[e[0]] = {}
-                    except AssertionError:
+                        self.events[e[0]]
+                        assert isinstance(self.events[e[0]], dict)
+                    except KeyError:
                         self.events[e[0]] = {}
-                    e[1]['plugin'] = plugin_name
-                    self.events[e[0]][int(e[1]['priority'])] = e[1]
-            except ImportError:
-                print 'Unable to load plugin %s' % plugin_name
-            #except:
-            #    print 'Error while loading plugin %s' % plugin_name
+                except AssertionError:
+                    self.events[e[0]] = {}
+                e[1]['plugin'] = plugin_name
+                self.events[e[0]][int(e[1]['priority'])] = e[1]
+        except ImportError:
+            print 'Unable to load plugin %s' % plugin_name
+            return False
+        except:
+            print 'Error while loading plugin %s' % plugin_name
+            return False
+        return True
+
+    def unload_plugin(self, plugin_name):
+        try:
+            del self.registered_plugins[plugin_name]
+            for i in range(len(self.events)):
+                if self.events[i]['plugin'] == plugin_name:
+                    del self.events[i]
+            return True
+        except IndexError:
+            return False
 
     def on_welcome(self, serv, ev):
         try:
@@ -79,7 +95,10 @@ class Nicebot(bot.SingleServerIRCBot):
                         pass
                 else:
                     if not plugin_event['exclusive'] or not answered:
-                        answered = answered or self.registered_plugins[plugin_event['plugin']].on_pubmsg(serv, ev, helper)
+                        try:
+                            answered = answered or self.registered_plugins[plugin_event['plugin']].on_pubmsg(serv, ev, helper)
+                        except KeyError: # si on désactive le plugin, ça n’arrête pas la boucle
+                            pass
         except AssertionError:
             pass
 

@@ -7,7 +7,7 @@ from stdPlugin import stdPlugin
 
 class discuss(stdPlugin):
 
-    events = [('pubmsg', {'priority': 1, 'exclusive': True, 'command_namespace': 'say'})]
+    events = [('pubmsg', {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'})]
 
     def on_pubmsg(self, serv, ev, helper):
         if helper['message'].find(serv.username) >= 0:

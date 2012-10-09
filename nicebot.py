@@ -8,7 +8,7 @@ conf = {'server': [('irc.geeknode.org', 6667)],
         'fullname': 'Le bot IRC du Nicelab',
         'chans': ['#poney-gonflable'],
         'command_prefix': '~',
-        'plugins': ['admin', 'discuss']}
+        'plugins': ['admin', 'autopan', 'catcopter', 'discuss']}
 
 class Nicebot(bot.SingleServerIRCBot):
 

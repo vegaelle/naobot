@@ -3,26 +3,26 @@
 import sys
 from irc import bot
 
-conf = {'server': [('irc.geeknode.org', 6667)],
-        'nick': 'Nicebot',
-        'fullname': 'Le bot IRC du Nicelab',
-        'chans': ['#poney-gonflable'],
-        'command_prefix': '~',
-        'plugins': ['admin', 'autopan', 'catcopter', 'discuss']}
+from settings import conf, plugins_conf
 
 class Nicebot(bot.SingleServerIRCBot):
 
     registered_plugins = {}
     events = {}
 
-    def __init__(self):
-        bot.SingleServerIRCBot.__init__(self, conf['server'], conf['nick'], conf['fullname'])
-        for plugin_name in conf['plugins']:
+    def __init__(self, conf, plugins_conf):
+        self.conf = conf
+        bot.SingleServerIRCBot.__init__(self, self.conf['server'], self.conf['nick'], self.conf['fullname'])
+        for plugin_name in self.conf['plugins']:
             try:
                 importStr = 'from plugins import %s' % plugin_name
                 exec importStr
                 plugin = getattr(sys.modules['plugins.'+plugin_name], plugin_name)
-                self.registered_plugins[plugin_name] = plugin(self)
+                try:
+                    plugin_conf = plugins_conf[plugin_name]
+                except KeyError:
+                    plugin_conf = {}
+                self.registered_plugins[plugin_name] = plugin(self, plugin_conf)
                 for e in plugin.events:
                     try:
                         try:
@@ -40,6 +40,16 @@ class Nicebot(bot.SingleServerIRCBot):
             #    print 'Error while loading plugin %s' % plugin_name
 
     def on_welcome(self, serv, ev):
+        try:
+            self.conf['password']
+            try:
+                self.conf['login_command']
+                login_command = self.conf['login_command']
+            except KeyError:
+                login_command = ('NickServ', 'identify %s')
+            serv.privmsg(login_command[0], login_command[1] % self.conf['password'])
+        except KeyError:
+            pass
         for c in conf['chans']:
             serv.join(c)
 
@@ -73,5 +83,50 @@ class Nicebot(bot.SingleServerIRCBot):
         except AssertionError:
             pass
 
+    def on_action(self, serv, ev):
+        message = ev.arguments()[0]
+        sender = ev.source().split('!')[0]
+        chan = self.channels[ev.target()]
+        helper = {'message': message, 'sender': sender, 'chan': chan}
+        try:
+            assert isinstance(self.events['action'], dict)
+            answered = False
+            for key in sorted(self.events['action'].iterkeys()):
+                plugin_event = self.events['action'][key]
+                if not plugin_event['exclusive'] or not answered:
+                    answered = answered or self.registered_plugins[plugin_event['plugin']].on_action(serv, ev, helper)
+        except AssertionError:
+            pass
+
+    def on_join(self, serv, ev):
+        chan = self.channels[ev.target()]
+        sender = ev.source().split('!')[0]
+        helper = {'sender': sender, 'chan': chan}
+        try:
+            assert isinstance(self.events['join'], dict)
+            answered = False
+            for key in sorted(self.events['join'].iterkeys()):
+                plugin_event = self.events['join'][key]
+                if not plugin_event['exclusive'] or not answered:
+                    answered = answered or self.registered_plugins[plugin_event['plugin']].on_join(serv, ev, helper)
+        except AssertionError:
+            pass
+
+    def on_kick(self, serv, ev):
+        victim = ev.arguments()[0]
+        message = ev.arguments()[1]
+        sender = ev.source().split('!')[0]
+        chan = self.channels[ev.target()]
+        helper = {'message': message, 'sender': sender, 'chan': chan, 'victim': victim}
+        try:
+            assert isinstance(self.events['kick'], dict)
+            answered = False
+            for key in sorted(self.events['kick'].iterkeys()):
+                plugin_event = self.events['kick'][key]
+                if not plugin_event['exclusive'] or not answered:
+                    answered = answered or self.registered_plugins[plugin_event['plugin']].on_kick(serv, ev, helper)
+        except AssertionError:
+            pass
+
 if __name__ == '__main__':
-    Nicebot().start()
+    Nicebot(conf, plugins_conf).start()

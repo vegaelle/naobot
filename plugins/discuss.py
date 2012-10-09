@@ -7,28 +7,58 @@ from stdPlugin import stdPlugin
 
 class discuss(stdPlugin):
 
-    events = [('pubmsg', {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'})]
+    events = [('pubmsg', {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'}),
+              ('action', {'priority': 9999, 'exclusive': True}),
+              ('join', {'priority': 9999, 'exclusive': True}),
+              ('kick', {'priority': 9999, 'exclusive': True})]
 
-    def on_pubmsg(self, serv, ev, helper):
-        if helper['message'].find(serv.username) >= 0:
-            sentence = random.choice(self.sentences['mention'])
+    def random_sentence(self, serv, ev, helper, type, vars):
+        try:
+            sentence = random.choice(self.sentences[type])
             if hasattr(sentence, '__call__'):
                 result = sentence(serv, ev, helper)
                 return result
             else:
-                vars = {'nick': helper['sender'],
-                        'message': helper['message'],
-                        'chan': ev.target(),
-                        }
-                self.say(serv, ev.target(), self.template(sentence, vars))
+                self.say(serv, ev.target(), sentence % vars)
                 return True
+        except KeyError:
+            pass
+
+    def on_pubmsg(self, serv, ev, helper):
+        if helper['message'].find(serv.username) >= 0:
+            vars = {'nick': helper['sender'],
+                    'message': helper['message'],
+                    'chan': ev.target(),
+                    }
+            return self.random_sentence(serv, ev, helper, 'mention', vars)
+        else:
+            return False
+
+    def on_action(self, serv, ev, helper):
+        return self.on_pubmsg(serv, ev, helper)
+
+    def on_join(self, serv, ev, helper):
+        if helper['sender'] == serv.username: #s’il s’agit de notre propre join
+            vars = {'chan': ev.target(),
+                    }
+            return self.random_sentence(serv, ev, helper, 'joining', vars)
+        else:
+            return False
+
+    def on_kick(self, serv, ev, helper):
+        vars = {'nick': helper['sender'],
+                'message': helper['message'],
+                'chan': ev.target(),
+                'victim': helper['victim'],
+                }
+        return self.random_sentence(serv, ev, helper, 'kick', vars)
 
     def answer_message(self, serv, ev, helper):
         message = re.sub(serv.username, helper['sender'], helper['message'])
         if ev.eventtype() == 'pubmsg' or ev.eventtype() == 'privmsg':
             serv.privmsg(ev.target(), message)
         elif ev.eventtype() == 'action':
-            self.action(ev.target(), message)
+            serv.action(ev.target(), message)
         else:
             print ev.eventtype()
         return True
@@ -37,10 +67,21 @@ class discuss(stdPlugin):
         serv.privmsg(ev.target(), 'Je ne connais pas la commande %s' % command)
         return True
 
-    def __init__(self, bot):
+    def __init__(self, bot, conf):
         # déclaration des différentes phrases
-        self.sentences = {'mention': [u'/me mange {{ nick }}',
+        self.sentences = {'mention': [u'/me mange %(nick)s',
                                  u'Hein ?',
                                  self.answer_message,
-                                 ]}
-        return super(discuss, self).__init__(bot)
+                                 u'Ho, ta gueule %(nick)s',
+                                 ],
+                          'joining': [u'Coucou, tu veux voir mon bit ?',
+                                      u'Ohai %(chan)s o/',
+                                      u'Faites comme si j’étais pas là.',
+                                      u'De toutes façons, il meurt à la fin.',
+                                      ],
+                          'kick': [u'Bon débarras.',
+                                   u'J’en avais marre de %(victim)s de toutes façons',
+                                   u'Haha.',
+                                   ],
+                          }
+        return super(discuss, self).__init__(bot, conf)

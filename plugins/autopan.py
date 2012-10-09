@@ -20,4 +20,7 @@ class autopan(stdPlugin):
         if helper['message'].find('>o_/') >= 0:
             serv.privmsg(ev.target(), 'pan >x_/')
             return True
+        if helper['message'].find(u'ᴎIOↃ') >= 0:
+            serv.privmsg(ev.target(), u'ᴎAP')
+            return True
 

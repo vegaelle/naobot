@@ -3,8 +3,15 @@
 import re
 
 class stdPlugin(object):
+
+    def __init__(self, bot):
+        self.bot = bot
+
     def on_pubmsg(self, serv, ev, helper):
         return False
+
+    def on_cmd(self, serv, ev, command, args):
+        return false
     
     def on_event(self, serv, ev, helper):
         return False

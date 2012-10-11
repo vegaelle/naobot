@@ -4,8 +4,10 @@ from stdPlugin import stdPlugin
 
 class admin(stdPlugin):
 
-    events = [('pubmsg', {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'}),
-              ('privmsg', {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'})]
+    events = {
+            'pubmsg': {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'},
+            'privmsg': {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'},
+        }
 
     def on_cmd(self, serv, ev, command, args, helper):
         sender = ev.source().split('!')[0]

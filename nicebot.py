@@ -23,22 +23,20 @@ class Nicebot(bot.SingleServerIRCBot):
             importStr = 'from plugins import %s' % plugin_name
             exec importStr
             plugin = getattr(sys.modules['plugins.'+plugin_name], plugin_name)
-            try:
+            if plugin_name in plugins_conf:
                 plugin_conf = plugins_conf[plugin_name]
-            except KeyError:
+            else:
                 plugin_conf = {}
             self.registered_plugins[plugin_name] = plugin(self, plugin_conf)
-            for e in plugin.events:
+            for e_name, e_values in plugin.events.items():
+                if e_name not in self.events:
+                    self.events[e_name] = {}
                 try:
-                    try:
-                        self.events[e[0]]
-                        assert isinstance(self.events[e[0]], dict)
-                    except KeyError:
-                        self.events[e[0]] = {}
+                    assert isinstance(self.events[e_name], dict)
                 except AssertionError:
-                    self.events[e[0]] = {}
-                e[1]['plugin'] = plugin_name
-                self.events[e[0]][int(e[1]['priority'])] = e[1]
+                    self.events[e_name] = {}
+                e_values['plugin'] = plugin_name
+                self.events[e_name][int(e_values['priority'])] = e_values
         except ImportError:
             print 'Unable to load plugin %s' % plugin_name
             return False

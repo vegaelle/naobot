@@ -4,7 +4,7 @@ from stdPlugin import stdPlugin
 
 class catcopter(stdPlugin):
 
-    events = [('pubmsg', {'priority': 2, 'exclusive': True, 'command_namespace': 'catcopter'})]
+    events = {'pubmsg': {'priority': 2, 'exclusive': True, 'command_namespace': 'catcopter'}}
 
     def on_cmd(self, serv, ev, command, args, helper):
         serv.privmsg(helper['target'], '''              ,-----.             ''')

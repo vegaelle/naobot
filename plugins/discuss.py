@@ -7,11 +7,13 @@ from stdPlugin import stdPlugin
 
 class discuss(stdPlugin):
 
-    events = [('pubmsg', {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'}),
-              ('privmsg', {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'}),
-              ('action', {'priority': 9999, 'exclusive': True}),
-              ('join', {'priority': 9999, 'exclusive': True}),
-              ('kick', {'priority': 9999, 'exclusive': True})]
+    events = {
+            'pubmsg': {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'},
+            'privmsg': {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'},
+            'action': {'priority': 9999, 'exclusive': True},
+            'join': {'priority': 9999, 'exclusive': True},
+            'kick': {'priority': 9999, 'exclusive': True},
+        }
 
     def random_sentence(self, serv, ev, helper, type, vars):
         try:

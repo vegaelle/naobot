@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
+import argparse
 from irc import bot
 
-from settings import conf, plugins_conf
+#from settings import conf, plugins_conf
 
 class Nicebot(bot.SingleServerIRCBot):
 
@@ -148,4 +150,32 @@ class Nicebot(bot.SingleServerIRCBot):
             pass
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Nicelab IRC bot', version='%(prog)s 0.5')
+    parser.add_argument('-d', '--daemon', action='store_true', default=False, dest='daemon', help='start bot as a daemon')
+    parser.add_argument('-c', '--config-file', action='store', dest='config_file', default='settings', help='use given file in ./settings/ dir for bot configuration')
+
+    results = parser.parse_args()
+
+    if results.daemon:
+        try:
+            pid = os.fork()
+        except OSError, e:
+            raise Exception, '%s [%d]' % (e.strerror, e.errno)
+
+        if pid == 0:
+            os.setsid()
+            try:
+                pid = os.fork()
+            except OSError, e:
+                raise Exception, '%s [%d]' % (e.strerror, e.errno)
+
+            if pid == 0:
+                pass
+            else:
+                os._exit(0)
+        else:
+            os._exit(0)
+
+    exec('from settings.%s import conf, plugins_conf' % results.config_file)
+
     Nicebot(conf, plugins_conf).start()

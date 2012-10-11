@@ -101,7 +101,40 @@ class Nicebot(bot.SingleServerIRCBot):
                             answered = answered or self.registered_plugins[plugin_event['plugin']].on_pubmsg(serv, ev, helper)
                         except KeyError: # si on désactive le plugin, ça n’arrête pas la boucle
                             pass
-        except AssertionError:
+        except (AssertionError, KeyError):
+            pass
+
+    def on_privmsg(self, serv, ev):
+        message = ev.arguments()[0]
+        sender = ev.source().split('!')[0]
+        #chan = self.channels[ev.target()]
+        helper = {'message': message, 'sender': sender}
+        try:
+            assert isinstance(self.events['privmsg'], dict)
+            answered = False
+            for key in sorted(self.events['privmsg'].iterkeys()):
+                plugin_event = self.events['privmsg'][key]
+                if message.startswith(conf['command_prefix']):
+                    try:
+                        plugin_event['command_namespace']
+                        if message.startswith(conf['command_prefix']+plugin_event['command_namespace']):
+                            # on appelle une commande
+                            cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
+                            message = message[cmd_len:]
+                            args = message.split(' ')
+                            args.reverse()
+                            command = args.pop()
+                            args.reverse()
+                            answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args)
+                    except KeyError:
+                        pass
+                else:
+                    if not plugin_event['exclusive'] or not answered:
+                        try:
+                            answered = answered or self.registered_plugins[plugin_event['plugin']].on_privmsg(serv, ev, helper)
+                        except KeyError: # si on désactive le plugin, ça n’arrête pas la boucle
+                            pass
+        except (AssertionError, KeyError):
             pass
 
     def on_action(self, serv, ev):
@@ -116,7 +149,7 @@ class Nicebot(bot.SingleServerIRCBot):
                 plugin_event = self.events['action'][key]
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_action(serv, ev, helper)
-        except AssertionError:
+        except (AssertionError, KeyError):
             pass
 
     def on_join(self, serv, ev):
@@ -130,7 +163,7 @@ class Nicebot(bot.SingleServerIRCBot):
                 plugin_event = self.events['join'][key]
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_join(serv, ev, helper)
-        except AssertionError:
+        except AssertionError, KeyError:
             pass
 
     def on_kick(self, serv, ev):
@@ -146,7 +179,7 @@ class Nicebot(bot.SingleServerIRCBot):
                 plugin_event = self.events['kick'][key]
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_kick(serv, ev, helper)
-        except AssertionError:
+        except (AssertionError, KeyError):
             pass
 
 if __name__ == '__main__':

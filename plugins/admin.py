@@ -4,7 +4,8 @@ from stdPlugin import stdPlugin
 
 class admin(stdPlugin):
 
-    events = [('pubmsg', {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'})]
+    events = [('pubmsg', {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'}),
+              ('privmsg', {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'})]
 
     def on_cmd(self, serv, ev, command, args):
         sender = ev.source().split('!')[0]
@@ -39,4 +40,22 @@ class admin(stdPlugin):
                     print u'Erreur : le plugin %s est introuvable ou inactif' % args[0]
                     serv.privmsg(ev.target(), u'Erreur : le plugin %s est introuvable ou inactif' % args[0])
                     return True
-
+        elif command == 'join':
+            if sender in self.conf['admins']:
+                chan_name = args[0]
+                if not chan_name.startswith('#'):
+                    chan_name = '#%s' % chan_name
+                result = serv.join(chan_name)
+                if not result:
+                    serv.privmsg(ev.target(), 'Impossible de rejoindre le chan.')
+        elif command == 'leave':
+            if sender in self.conf['admins']:
+                args.reverse()
+                chan_name = args.pop()
+                args.reverse()
+                reason = ' '.join(args)
+                if not chan_name.startswith('#'):
+                    chan_name = '#%s' % chan_name
+                result = serv.part(chan_name, reason)
+                if not result:
+                    serv.privmsg(ev.target(), 'Impossible de partir du chan.')

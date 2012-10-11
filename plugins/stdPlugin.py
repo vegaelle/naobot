@@ -13,6 +13,9 @@ class stdPlugin(object):
     def on_pubmsg(self, serv, ev, helper):
         return False
 
+    def on_privmsg(self, serv, ev, helper):
+        return False
+
     def on_action(self, serv, ev, helper):
         return False
 

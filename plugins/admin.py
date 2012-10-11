@@ -48,9 +48,7 @@ class admin(stdPlugin):
                 result = serv.join(chan_name)
         elif command == 'leave':
             if sender in self.conf['admins']:
-                args.reverse()
-                chan_name = args.pop()
-                args.reverse()
+                chan_name = args.pop(0)
                 reason = ' '.join(args)
                 if not chan_name.startswith('#'):
                     chan_name = '#%s' % chan_name

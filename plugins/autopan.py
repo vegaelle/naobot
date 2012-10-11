@@ -1,26 +1,22 @@
 # -*- coding: utf-8 -*-
 
-import re
 from stdPlugin import stdPlugin
 
 class autopan(stdPlugin):
 
-    events = [('pubmsg', {'priority': 1, 'exclusive': True})]
+    events = {'pubmsg': {'priority': 1, 'exclusive': True}}
+
+    targets = (
+            ('coin', 'pan'),
+            ('nioc', 'nap'),
+            ('\_o<', '\_x<'),
+            ('>o_/', '>x_/'),
+            (u'ᴎIOↃ', u'ᴎAP'),
+        )
 
     def on_pubmsg(self, serv, ev, helper):
-        if helper['message'].find('coin') >= 0:
-            serv.privmsg(helper['target'], 'pan')
-            return True
-        elif helper['message'].find('nioc') >= 0:
-            serv.privmsg(helper['target'], 'nap')
-            return True
-        if helper['message'].find('\_o<') >= 0:
-            serv.privmsg(helper['target'], 'pan \_x<')
-            return True
-        if helper['message'].find('>o_/') >= 0:
-            serv.privmsg(helper['target'], 'pan >x_/')
-            return True
-        if helper['message'].find(u'ᴎIOↃ') >= 0:
-            serv.privmsg(helper['target'], u'ᴎAP')
-            return True
-
+        for coin, pan in self.targets:
+            if helper['message'].find(coin) >= 0:
+                serv.privmsg(helper['target'], pan)
+                # only trigger one time per msg
+                return True

@@ -85,7 +85,7 @@ class Nicebot(bot.SingleServerIRCBot):
                 if helper['message'].startswith(conf['command_prefix']):
                     try:
                         plugin_event['command_namespace']
-                        if plugin['message'].startswith(conf['command_prefix']+plugin_event['command_namespace']):
+                        if helper['message'].startswith(conf['command_prefix']+plugin_event['command_namespace']):
                             # on appelle une commande
                             cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
                             helper['message'] = helper['message'][cmd_len:]

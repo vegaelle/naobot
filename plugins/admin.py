@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 from stdPlugin import stdPlugin
 
 class admin(stdPlugin):
@@ -40,6 +41,11 @@ class admin(stdPlugin):
                     print u'Erreur : le plugin %s est introuvable ou inactif' % args[0]
                     serv.privmsg(helper['target'], u'Erreur : le plugin %s est introuvable ou inactif' % args[0])
                     return True
+        elif command == 'reload':
+            try:
+                reload(sys.modules['plugins.'+args[0]])
+            except KeyError:
+                serv.privmsg(helper['target'], u'Erreur : le plugin %s est introuvable ou inactif' % args[0])
         elif command == 'join':
             if sender in self.conf['admins']:
                 chan_name = args[0]

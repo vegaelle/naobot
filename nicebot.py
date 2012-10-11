@@ -72,27 +72,28 @@ class Nicebot(bot.SingleServerIRCBot):
             serv.join(c)
 
     def on_pubmsg(self, serv, ev):
-        message = ev.arguments()[0]
-        sender = ev.source().split('!')[0]
-        chan = self.channels[ev.target()]
-        helper = {'message': message, 'sender': sender, 'chan': chan}
+        helper = {'message': ev.arguments()[0],
+                  'sender': ev.source().split('!')[0],
+                  'chan': self.channels[ev.target()],
+                  'target': ev.target()
+                 }
         try:
             assert isinstance(self.events['pubmsg'], dict)
             answered = False
             for key in sorted(self.events['pubmsg'].iterkeys()):
                 plugin_event = self.events['pubmsg'][key]
-                if message.startswith(conf['command_prefix']):
+                if helper['message'].startswith(conf['command_prefix']):
                     try:
                         plugin_event['command_namespace']
-                        if message.startswith(conf['command_prefix']+plugin_event['command_namespace']):
+                        if plugin['message'].startswith(conf['command_prefix']+plugin_event['command_namespace']):
                             # on appelle une commande
                             cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
-                            message = message[cmd_len:]
-                            args = message.split(' ')
+                            helper['message'] = helper['message'][cmd_len:]
+                            args = helper['message'].split(' ')
                             args.reverse()
                             command = args.pop()
                             args.reverse()
-                            answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args)
+                            answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
                     except KeyError:
                         pass
                 else:
@@ -105,27 +106,27 @@ class Nicebot(bot.SingleServerIRCBot):
             pass
 
     def on_privmsg(self, serv, ev):
-        message = ev.arguments()[0]
-        sender = ev.source().split('!')[0]
-        #chan = self.channels[ev.target()]
-        helper = {'message': message, 'sender': sender}
+        helper = {'message': ev.arguments()[0],
+                  'sender': ev.source().split('!')[0],
+                  'target': ev.source().split('!')[0]
+                 }
         try:
             assert isinstance(self.events['privmsg'], dict)
             answered = False
             for key in sorted(self.events['privmsg'].iterkeys()):
                 plugin_event = self.events['privmsg'][key]
-                if message.startswith(conf['command_prefix']):
+                if helper['message'].startswith(conf['command_prefix']):
                     try:
                         plugin_event['command_namespace']
-                        if message.startswith(conf['command_prefix']+plugin_event['command_namespace']):
+                        if helper['message'].startswith(conf['command_prefix']+plugin_event['command_namespace']):
                             # on appelle une commande
                             cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
-                            message = message[cmd_len:]
-                            args = message.split(' ')
+                            helper['message'] = helper['message'][cmd_len:]
+                            args = helper['message'].split(' ')
                             args.reverse()
                             command = args.pop()
                             args.reverse()
-                            answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args)
+                            answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
                     except KeyError:
                         pass
                 else:
@@ -138,10 +139,11 @@ class Nicebot(bot.SingleServerIRCBot):
             pass
 
     def on_action(self, serv, ev):
-        message = ev.arguments()[0]
-        sender = ev.source().split('!')[0]
-        chan = self.channels[ev.target()]
-        helper = {'message': message, 'sender': sender, 'chan': chan}
+        helper = {'message': ev.arguments()[0],
+                  'sender': ev.source().split('!')[0],
+                  'chan': self.channels[ev.target()],
+                  'target': ev.target()
+                 }
         try:
             assert isinstance(self.events['action'], dict)
             answered = False
@@ -153,9 +155,10 @@ class Nicebot(bot.SingleServerIRCBot):
             pass
 
     def on_join(self, serv, ev):
-        chan = self.channels[ev.target()]
-        sender = ev.source().split('!')[0]
-        helper = {'sender': sender, 'chan': chan}
+        helper = {'chan': self.channels[ev.target()],
+                  'sender': ev.source().split('!')[0],
+                  'target': ev.target()
+                 }
         try:
             assert isinstance(self.events['join'], dict)
             answered = False
@@ -167,11 +170,12 @@ class Nicebot(bot.SingleServerIRCBot):
             pass
 
     def on_kick(self, serv, ev):
-        victim = ev.arguments()[0]
-        message = ev.arguments()[1]
-        sender = ev.source().split('!')[0]
-        chan = self.channels[ev.target()]
-        helper = {'message': message, 'sender': sender, 'chan': chan, 'victim': victim}
+        helper = {'victim': ev.arguments()[0],
+                  'message': ev.arguments()[1],
+                  'sender': ev.source().split('!')[0],
+                  'chan': self.channels[ev.target()],
+                  'target': ev.target(),
+                 }
         try:
             assert isinstance(self.events['kick'], dict)
             answered = False

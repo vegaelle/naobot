@@ -9,18 +9,18 @@ class autopan(stdPlugin):
 
     def on_pubmsg(self, serv, ev, helper):
         if helper['message'].find('coin') >= 0:
-            serv.privmsg(ev.target(), 'pan')
+            serv.privmsg(helper['target'], 'pan')
             return True
         elif helper['message'].find('nioc') >= 0:
-            serv.privmsg(ev.target(), 'nap')
+            serv.privmsg(helper['target'], 'nap')
             return True
         if helper['message'].find('\_o<') >= 0:
-            serv.privmsg(ev.target(), 'pan \_x<')
+            serv.privmsg(helper['target'], 'pan \_x<')
             return True
         if helper['message'].find('>o_/') >= 0:
-            serv.privmsg(ev.target(), 'pan >x_/')
+            serv.privmsg(helper['target'], 'pan >x_/')
             return True
         if helper['message'].find(u'ᴎIOↃ') >= 0:
-            serv.privmsg(ev.target(), u'ᴎAP')
+            serv.privmsg(helper['target'], u'ᴎAP')
             return True
 

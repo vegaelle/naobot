@@ -25,7 +25,7 @@ class stdPlugin(object):
     def on_kick(self, serv, ev, helper):
         return False
 
-    def on_cmd(self, serv, ev, command, args):
+    def on_cmd(self, serv, ev, command, args, helper):
         return false
 
     def say(self, serv, target, message):

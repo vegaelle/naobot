@@ -11,9 +11,9 @@ class figlet(stdPlugin):
         self.bot = bot
         self.conf = conf
 
-    def on_cmd(self, serv, ev, command, args):
+    def on_cmd(self, serv, ev, command, args, helper):
         f = Figlet()
         args = [command] + args
         message = ' '.join(args)
         for line in f.renderText(message).split('\n'):
-            serv.privmsg(ev.target(), line)
+            serv.privmsg(helper['target'], line)

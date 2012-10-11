@@ -8,6 +8,7 @@ from stdPlugin import stdPlugin
 class discuss(stdPlugin):
 
     events = [('pubmsg', {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'}),
+              ('privmsg', {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'}),
               ('action', {'priority': 9999, 'exclusive': True}),
               ('join', {'priority': 9999, 'exclusive': True}),
               ('kick', {'priority': 9999, 'exclusive': True})]
@@ -19,7 +20,7 @@ class discuss(stdPlugin):
                 result = sentence(serv, ev, helper)
                 return result
             else:
-                self.say(serv, ev.target(), sentence % vars)
+                self.say(serv, helper['target'], sentence % vars)
                 return True
         except KeyError:
             pass
@@ -28,7 +29,7 @@ class discuss(stdPlugin):
         if helper['message'].find(serv.username) >= 0:
             vars = {'nick': helper['sender'],
                     'message': helper['message'],
-                    'chan': ev.target(),
+                    'chan': helper['target'],
                     }
             return self.random_sentence(serv, ev, helper, 'mention', vars)
         else:
@@ -39,7 +40,7 @@ class discuss(stdPlugin):
 
     def on_join(self, serv, ev, helper):
         if helper['sender'] == serv.username: #s’il s’agit de notre propre join
-            vars = {'chan': ev.target(),
+            vars = {'chan': helper['target'],
                     }
             return self.random_sentence(serv, ev, helper, 'joining', vars)
         else:
@@ -48,7 +49,7 @@ class discuss(stdPlugin):
     def on_kick(self, serv, ev, helper):
         vars = {'nick': helper['sender'],
                 'message': helper['message'],
-                'chan': ev.target(),
+                'chan': helper['target'],
                 'victim': helper['victim'],
                 }
         return self.random_sentence(serv, ev, helper, 'kick', vars)
@@ -56,15 +57,15 @@ class discuss(stdPlugin):
     def answer_message(self, serv, ev, helper):
         message = re.sub(serv.username, helper['sender'], helper['message'])
         if ev.eventtype() == 'pubmsg' or ev.eventtype() == 'privmsg':
-            serv.privmsg(ev.target(), message)
+            serv.privmsg(helper['target'], message)
         elif ev.eventtype() == 'action':
-            serv.action(ev.target(), message)
+            serv.action(helper['target'], message)
         else:
             print ev.eventtype()
         return True
 
-    def on_cmd(self, serv, ev, command, args):
-        serv.privmsg(ev.target(), 'Je ne connais pas la commande %s' % command)
+    def on_cmd(self, serv, ev, command, args, helper):
+        serv.privmsg(helper['target'], 'Je ne connais pas la commande %s' % command)
         return True
 
     def __init__(self, bot, conf):

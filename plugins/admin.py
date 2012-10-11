@@ -44,14 +44,17 @@ class admin(stdPlugin):
         elif command == 'reload':
             try:
                 reload(sys.modules['plugins.'+args[0]])
+                self.bot.load_plugin(args[0])
             except KeyError:
                 serv.privmsg(helper['target'], u'Erreur : le plugin %s est introuvable ou inactif' % args[0])
+            return False
         elif command == 'join':
             if sender in self.conf['admins']:
                 chan_name = args[0]
                 if not chan_name.startswith('#'):
                     chan_name = '#%s' % chan_name
                 result = serv.join(chan_name)
+                return False
         elif command == 'leave':
             if sender in self.conf['admins']:
                 args.reverse()
@@ -61,5 +64,14 @@ class admin(stdPlugin):
                 if not chan_name.startswith('#'):
                     chan_name = '#%s' % chan_name
                 result = serv.part(chan_name, reason)
+                return False
+        elif command == 'chans':
+            chanlist = []
+            for chan in self.bot.channels.keys():
+                chanlist.append(chan)
+            serv.privmsg(helper['target'], u'Canaux actifs : %s' % ', '.join(chanlist))
+        elif command+' '+' '.join(args) == 'make me a sandwich':
+            serv.privmsg(helper['target'], 'What? Go make it yourself!')
+            return True
         else:
             serv.privmsg(helper['target'], 'Commande %s inconnue' % command)

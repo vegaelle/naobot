@@ -4,6 +4,7 @@ import sys
 from stdPlugin import stdPlugin
 
 class admin(stdPlugin):
+    '''Permet d'administrer le bot'''
 
     events = {
             'pubmsg': {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'},

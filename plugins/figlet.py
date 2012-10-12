@@ -5,7 +5,7 @@ from stdPlugin import stdPlugin
 
 class figlet(stdPlugin):
 
-    events = {'pubmsg': {'priority': 3, 'exclusive': True, 'command_namespace': 'figlet'}}
+    events = {'pubmsg': {'priority': 4, 'exclusive': True, 'command_namespace': 'figlet'}}
 
     def on_cmd(self, serv, ev, command, args, helper):
         f = Figlet()

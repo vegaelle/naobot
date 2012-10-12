@@ -4,7 +4,7 @@ from stdPlugin import stdPlugin
 
 class autopan(stdPlugin):
 
-    events = {'pubmsg': {'priority': 1, 'exclusive': True}}
+    events = {'pubmsg': {'priority': 2, 'exclusive': True}}
 
     targets = (
             ('coin', 'pan'),

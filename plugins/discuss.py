@@ -8,8 +8,8 @@ from stdPlugin import stdPlugin
 class discuss(stdPlugin):
 
     events = {
-            'pubmsg': {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'},
-            'privmsg': {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'},
+            'pubmsg': {'priority': 9999, 'exclusive': True},
+            'privmsg': {'priority': 9999, 'exclusive': True},
             'action': {'priority': 9999, 'exclusive': True},
             'join': {'priority': 9999, 'exclusive': True},
             'kick': {'priority': 9999, 'exclusive': True},

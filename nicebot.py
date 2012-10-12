@@ -96,16 +96,16 @@ class Nicebot(bot.SingleServerIRCBot):
                             command = args.pop(0).lower()
                             answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
                             helper['message'] = message
-                    except KeyError:
+                    except KeyError, e:
                         pass
                 else:
                     if not plugin_event['exclusive'] or not answered:
                         try:
                             answered = answered or self.registered_plugins[plugin_event['plugin']].on_pubmsg(serv, ev, helper)
-                        except KeyError: # si on désactive le plugin, ça n’arrête pas la boucle
-                            pass
-        except (AssertionError, KeyError):
-            pass
+                        except KeyError, e: # si on désactive le plugin, ça n’arrête pas la boucle
+                            print '%s: %s' % (e.__class__.__name__, e.message)
+        except (AssertionError, KeyError), e:
+            print '%s: %s' % (e.__class__.__name__, e.message)
 
     def on_privmsg(self, serv, ev):
         helper = {'message': ev.arguments()[0],

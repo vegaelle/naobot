@@ -6,7 +6,12 @@ from stdPlugin import stdPlugin
 
 class learn(stdPlugin):
 
-    events = {'pubmsg': {'priority': 1, 'exclusive': False, 'command_namespace': 'say'}}
+    events = {'pubmsg': {'priority': 1, 'exclusive': False, 'command_namespace': 'say'},
+              'privmsg': {'priority': 1, 'exclusive': False, 'command_namespace': 'say'},
+              'action': {'priority': 1, 'exclusive': False},
+
+              'join': {'priority': 1, 'exclusive': False},
+             }
 
     dico = {}
     begin_word = '|BEGIN|'
@@ -14,6 +19,13 @@ class learn(stdPlugin):
     cut_chars = '[,;:]'
     end_chars = '[.!?]'
     blacklist = set()
+
+    def __init__(self, bot, conf):
+        return_val = super(learn, self).__init__(bot, conf)
+        for chan in self.bot.channels:
+            self.get_dico(chan)
+        return return_val
+
 
     def on_pubmsg(self, serv, ev, helper):
         self.parse(helper['target'], helper['message'])
@@ -29,7 +41,7 @@ class learn(stdPlugin):
 
     def on_join(self, serv, ev, helper):
         if helper['sender'] == serv.username: #s’il s’agit de notre propre join
-            self.get_dico(helper['chan'])
+            self.get_dico(helper['target'])
             return False
         else:
             return False
@@ -42,15 +54,15 @@ class learn(stdPlugin):
             else:
                 serv.privmsg(helper['target'], self.get_sentence(helper['target'], args[0]))
                 return True
-        elif command == 'save':
-            if self.save_dico(helper['target']):
-                serv.privmsg(helper['target'], u'Dictionnaire sauvegardé : %d mots' % self.get_stats(helper['target']))
-                return True
-            else:
-                serv.privmsg(helper['target'], u'Erreur lors de la sauvegarde du dictionnaire !')
-                return True
-        elif command == 'dump':
-            serv.privmsg(helper['target'], u'Mot connus : %s' % ', '.join(self.dico[helper['target']]))
+        #elif command == 'save':
+        #    if self.save_dico(helper['target']):
+        #        serv.privmsg(helper['target'], u'Dictionnaire sauvegardé : %d mots' % self.get_stats(helper['target']))
+        #        return True
+        #    else:
+        #        serv.privmsg(helper['target'], u'Erreur lors de la sauvegarde du dictionnaire !')
+        #        return True
+        elif command == 'stats':
+            serv.privmsg(helper['target'], u'Mot connus : %d' % self.get_stats(helper['target']))
             return True
         else:
             serv.privmsg(helper['target'], u'Je ne connais pas cette commande.')
@@ -76,6 +88,7 @@ class learn(stdPlugin):
                 if current_word == last_word:
                     self.add_successor_to_word(chan, word, self.end_word)
                 current_word += 1
+        self.save_dico(chan)
 
     def get_sentence(self, chan, begin=None):
         if begin is None:

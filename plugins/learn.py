@@ -15,11 +15,6 @@ class learn(stdPlugin):
     end_chars = '[.!?]'
     blacklist = set()
 
-    def __init__(self, bot, conf):
-        return_var = super(learn, self).__init__(bot, conf)
-        for chan in self.bot.channels:
-            self.get_dico(chan)
-
     def on_pubmsg(self, serv, ev, helper):
         self.parse(helper['target'], helper['message'])
         return False
@@ -32,13 +27,20 @@ class learn(stdPlugin):
         self.parse(helper['target'], helper['message'])
         return False
 
+    def on_join(self, serv, ev, helper):
+        if helper['sender'] == serv.username: #s’il s’agit de notre propre join
+            self.get_dico(helper['chan'])
+            return False
+        else:
+            return False
+
     def on_cmd(self, serv, ev, command, args, helper):
         if command == 'sentence':
             if len(args) == 0:
                 serv.privmsg(helper['target'], self.get_sentence(helper['target']))
                 return True
             else:
-                serv.privmsg(helper['target'], self.get_sentence(helper['target']))
+                serv.privmsg(helper['target'], self.get_sentence(helper['target'], args[0]))
                 return True
         elif command == 'save':
             if self.save_dico(helper['target']):

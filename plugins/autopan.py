@@ -12,6 +12,7 @@ class autopan(stdPlugin):
             ('\_o<', '\_x<'),
             ('>o_/', '>x_/'),
             (u'ᴎIOↃ', u'ᴎAP'),
+            ('koin', 'pang'),
         )
 
     def on_pubmsg(self, serv, ev, helper):

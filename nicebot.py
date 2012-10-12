@@ -3,6 +3,8 @@
 import sys
 import os
 import argparse
+import re
+import pickle
 from irc import bot
 
 #from settings import conf, plugins_conf
@@ -20,6 +22,8 @@ class Nicebot(bot.SingleServerIRCBot):
 
     def load_plugin(self, plugin_name):
         try:
+            if not re.match('^[a-z]*$', plugin_name):
+                raise Exception('Invalid plugin name')
             importStr = 'from plugins import %s' % plugin_name
             exec importStr
             plugin = getattr(sys.modules['plugins.'+plugin_name], plugin_name)
@@ -37,11 +41,11 @@ class Nicebot(bot.SingleServerIRCBot):
                     self.events[e_name] = {}
                 e_values['plugin'] = plugin_name
                 self.events[e_name][int(e_values['priority'])] = e_values
-        except ImportError:
-            print 'Unable to load plugin %s' % plugin_name
+        except (ImportError, Exception), e:
+            print 'Unable to load plugin %s: %s' % (plugin_name, e.message)
             return False
-        except:
-            print 'Error while loading plugin %s' % plugin_name
+        except Exception, e:
+            print 'Error while loading plugin %s: %s' % (plugin_name, e.message)
             return False
         return True
 
@@ -86,10 +90,12 @@ class Nicebot(bot.SingleServerIRCBot):
                         if helper['message'].startswith(conf['command_prefix']+plugin_event['command_namespace']):
                             # on appelle une commande
                             cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
+                            message = helper['message']
                             helper['message'] = helper['message'][cmd_len:]
                             args = helper['message'].split(' ')
-                            command = args.pop(0)
+                            command = args.pop(0).lower()
                             answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
+                            helper['message'] = message
                     except KeyError:
                         pass
                 else:
@@ -119,7 +125,7 @@ class Nicebot(bot.SingleServerIRCBot):
                             cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
                             helper['message'] = helper['message'][cmd_len:]
                             args = helper['message'].split(' ')
-                            command = args.pop(0)
+                            command = args.pop(0).lower()
                             answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
                     except KeyError:
                         pass
@@ -179,6 +185,32 @@ class Nicebot(bot.SingleServerIRCBot):
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_kick(serv, ev, helper)
         except (AssertionError, KeyError):
             pass
+
+    def get_config(self, plugin, name, default=None):
+        try:
+            path = os.path.join('data', plugin.__class__.__name__)
+            try:
+                os.makedirs(path)
+            except OSError:
+                pass
+            with open(os.path.join(path, name), 'rb') as data_file:
+                data = pickle.load(data_file)
+                return data
+        except (OSError, IOError):
+            return default
+
+    def write_config(self, plugin, name, data):
+        try:
+            path = os.path.join('data', plugin.__class__.__name__)
+            try:
+                os.makedirs(path)
+            except OSError:
+                pass
+            with open(os.path.join(path, name), 'wb') as data_file:
+                pickle.dump(data, data_file)
+                return True
+        except (OSError, IOError):
+            return False
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Nicelab IRC bot', version='%(prog)s 0.5')

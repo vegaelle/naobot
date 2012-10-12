@@ -5,7 +5,7 @@ from stdPlugin import stdPlugin
 
 class figlet(stdPlugin):
 
-    events = {'pubmsg': {'priority': 3, 'exclusive': True, 'command_namespace': 'figlet'}}
+    events = {'pubmsg': {'priority': 4, 'exclusive': True, 'command_namespace': 'figlet'}}
 
     def __init__(self, bot, conf):
         self.bot = bot

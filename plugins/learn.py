@@ -93,9 +93,11 @@ class learn(stdPlugin):
     def get_sentence(self, chan, begin=None):
         if begin is None:
             begin = self.begin_word
+            current_word = self.get_random_next_word(chan, begin)
         elif begin not in self.dico[chan]:
-            return False
-        current_word = self.get_random_next_word(chan, begin)
+            return 'Je ne connais pas ce mot.'
+        else:
+            current_word = begin
         sentence = current_word
         current_word = self.get_random_next_word(chan, current_word)
         while current_word != self.end_word:

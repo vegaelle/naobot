@@ -6,7 +6,8 @@ from stdPlugin import stdPlugin
 class help(stdPlugin):
     u'''Indique le fonctionnement des divers plugins et commandes.'''
 
-    events = {'pubmsg': {'priority': 6, 'exclusive': True, 'command_namespace': 'help'}}
+    events = {'pubmsg': {'priority': 6, 'exclusive': True, 'command_namespace': 'help'},
+              'privmsg': {'priority': 6, 'exclusive': True, 'command_namespace': 'help'}}
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s : liste les plugins disponibles.

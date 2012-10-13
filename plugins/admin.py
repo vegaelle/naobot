@@ -17,6 +17,7 @@ class admin(stdPlugin):
         %(namespace)s load <plugin> : charge et active un plugin.
         %(namespace)s unload <plugin> : désactive un plugin.
         %(namespace)s reload <plugin> : recharge un plugin, s’il a été modifié'
+        %(namespace)s reload-all : recharge tous les plugins actifs, s’ils ont été modifiés'
         %(namespace)s join <chan> : rejoint un canal.
         %(namespace)s leave <chan> : quitte un canal.
         %(namespace)s chans : indique la liste des canaux actifs.'''
@@ -57,6 +58,14 @@ class admin(stdPlugin):
                 self.bot.load_plugin(args[0])
             except KeyError:
                 serv.privmsg(helper['target'], u'Erreur : le plugin %s est introuvable ou inactif' % args[0])
+            return False
+        elif command == 'reload-all':
+            try:
+                for plugin in self.bot.registered_plugins:
+                    reload(sys.modules['plugins.'+plugin])
+                    self.bot.load_plugin(plugin)
+            except KeyError:
+                serv.privmsg(helper['target'], u'Erreur : le plugin %s est introuvable ou inactif' % plugin)
             return False
         elif command == 'join':
             chan_name = args[0]

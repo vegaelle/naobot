@@ -3,6 +3,7 @@
 import re
 
 class stdPlugin(object):
+    u'''Permet de créer des plugins.'''
 
     #events = {'pubmsg': {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'}}
     events = {}
@@ -27,6 +28,7 @@ class stdPlugin(object):
         return False
 
     def on_cmd(self, serv, ev, command, args, helper):
+        u'''Retourne l’aide correspondant à chaque commande.'''
         return false
 
     def say(self, serv, target, message):

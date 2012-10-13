@@ -3,6 +3,7 @@
 from stdPlugin import stdPlugin
 
 class autopan(stdPlugin):
+    u'''Réagit pragmatiquement aux invasions palmipèdes sur les canaux.'''
 
     events = {'pubmsg': {'priority': 2, 'exclusive': True}}
 

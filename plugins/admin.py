@@ -4,7 +4,7 @@ import sys
 from stdPlugin import stdPlugin
 
 class admin(stdPlugin):
-    '''Permet d'administrer le bot'''
+    u'''Permet d’administrer le bot. Les commandes, sauf mention contraire, sont réservées aux administrateurs.'''
 
     events = {
             'pubmsg': {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'},
@@ -12,6 +12,14 @@ class admin(stdPlugin):
         }
 
     def on_cmd(self, serv, ev, command, args, helper):
+        u'''%(namespace)s quit : termine sauvagement le bot.
+        %(namespace)s list : indique les plugins activés.
+        %(namespace)s load <plugin> : charge et active un plugin.
+        %(namespace)s unload <plugin> : désactive un plugin.
+        %(namespace)s reload <plugin> : recharge un plugin, s’il a été modifié'
+        %(namespace)s join <chan> : rejoint un canal.
+        %(namespace)s leave <chan> : quitte un canal.
+        %(namespace)s chans : indique la liste des canaux actifs.'''
         sender = ev.source().split('!')[0]
         if sender not in self.conf['admins']:
             serv.privmsg(helper['target'], u'Nope.')

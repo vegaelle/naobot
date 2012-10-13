@@ -6,6 +6,7 @@ import re
 from stdPlugin import stdPlugin
 
 class discuss(stdPlugin):
+    u'''Tente d’engager la conversation sur un canal.'''
 
     events = {
             'pubmsg': {'priority': 9999, 'exclusive': True},

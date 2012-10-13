@@ -5,6 +5,7 @@ import random
 from stdPlugin import stdPlugin
 
 class learn(stdPlugin):
+    u'''Apprend continuellement les mots utilisés sur un canal, et génère des phrases aléatoires et stupides.'''
 
     events = {'pubmsg': {'priority': 1, 'exclusive': False, 'command_namespace': 'say'},
               'privmsg': {'priority': 1, 'exclusive': False, 'command_namespace': 'say'},
@@ -47,6 +48,9 @@ class learn(stdPlugin):
             return False
 
     def on_cmd(self, serv, ev, command, args, helper):
+        u'''%(namespace)s sentence : génère une phrase aléatoire.
+        %(namespace)s sentence <mot> : génère une phrase aléatoire contenant le mot donné, s’il est connu.
+        %(namespace)s stats : indique le nombre de mots connus pour le canal courant'''
         if command == 'sentence':
             if len(args) == 0:
                 serv.privmsg(helper['target'], self.get_sentence(helper['target']))

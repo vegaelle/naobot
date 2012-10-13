@@ -29,7 +29,7 @@ class discuss(stdPlugin):
             pass
 
     def on_pubmsg(self, serv, ev, helper):
-        if helper['message'].find(serv.username) >= 0:
+        if helper['message'].lower().find(serv.username.lower()) >= 0:
             vars = {'nick': helper['sender'],
                     'message': helper['message'],
                     'chan': helper['target'],

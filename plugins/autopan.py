@@ -19,7 +19,7 @@ class autopan(stdPlugin):
     def on_pubmsg(self, serv, ev, helper):
         pans = []
         for coin, pan in self.targets:
-            for _ in xrange(helper['message'].count(coin)):
+            for _ in xrange(helper['message'].lower().count(coin)):
                 pans.append(pan)
         if pans:
             if len(pans) < 3:

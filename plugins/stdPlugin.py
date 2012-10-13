@@ -30,7 +30,7 @@ class stdPlugin(object):
         return false
 
     def say(self, serv, target, message):
-        if message.startswith('/me'):
-            serv.action(target, message[3:])
+        if message.startswith('/me '):
+            serv.action(target, message[4:])
         else:
             serv.privmsg(target, message)

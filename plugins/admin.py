@@ -13,7 +13,8 @@ class admin(stdPlugin):
     def on_cmd(self, serv, ev, command, args, helper):
         sender = ev.source().split('!')[0]
         if sender not in self.conf['admins']:
-            return
+            serv.privmsg(helper['target'], u'Nope.')
+            return True
         if command == 'quit':
             self.bot.die()
             return True

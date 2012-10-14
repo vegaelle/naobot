@@ -14,7 +14,10 @@ class learn(stdPlugin):
               'join': {'priority': 1, 'exclusive': False},
              }
 
+    # We need to be able to build sentences forward *and* backward
+    # from a given word.
     dico = {}
+    backward_dico = {}
     begin_word = '|BEGIN|'
     end_word = '|END|'
     cut_chars = '[,;:]'
@@ -72,42 +75,70 @@ class learn(stdPlugin):
             serv.privmsg(helper['target'], u'Je ne connais pas cette commande.')
             return True
 
+    def build_backward_dico(self, chan):
+        """Rebuilds self.backward_dico[chan] from self.dico[chan].
+        Only used for compatibility with older versions of the plugin."""
+        res = {}
+        for word, next_words in self.dico[chan].items():
+            for next_word, weight in next_words.items():
+                if next_word not in res:
+                    res[next_word] = {}
+                try:
+                    res[next_word][word] += weight
+                except KeyError:
+                    res[next_word][word] = weight
+        return res
+
     def get_dico(self, chan):
-        self.dico[chan] = self.bot.get_config(self, chan, {})
+        data = self.bot.get_config(self, chan, ({}, {}))
+        # Compatibility with older versions
+        if isinstance(data, dict):
+            self.dico[chan] = data
+            self.backward_dico[chan] = self.build_backward_dico(chan)
+        else:
+            self.dico[chan] = data[0]
+            self.backward_dico[chan] = data[1]
 
     def save_dico(self, chan):
-        return self.bot.write_config(self, chan, self.dico[chan])
+        return self.bot.write_config(self, chan, (self.dico[chan], self.backward_dico[chan]))
 
     def parse(self, chan, sentence):
-        sentences = re.split(self.end_chars, sentence)
+        # We don't want to keep empty sentences
+        sentences = [s for s in re.split(self.end_chars, sentence) if s]
         for sentence in sentences:
-            current_word = 0
+            current_word = 1
             words = sentence.split()
-            last_word = len(words) - 1
-            for word in words:
-                if current_word == 0:
-                    self.add_successor_to_word(chan, self.begin_word, word)
-                else:
-                    self.add_successor_to_word(chan, words[current_word-1], word)
-                if current_word == last_word:
-                    self.add_successor_to_word(chan, word, self.end_word)
+            words.insert(0, self.begin_word)
+            words.append(self.end_word)
+            for word in words[1:]:
+                self.add_relation(chan, self.dico, words[current_word-1], word)
+                self.add_relation(chan, self.backward_dico, word, words[current_word-1])
                 current_word += 1
         self.save_dico(chan)
 
-    def get_sentence(self, chan, begin=None):
-        if begin is None:
-            begin = self.begin_word
-            current_word = self.get_random_next_word(chan, begin)
-        elif begin not in self.dico[chan]:
-            return 'Je ne connais pas ce mot.'
+    def get_key_nocase(self, word, dico):
+        """Search for a key matching the given word (ignoring case).
+        Returns the key found, or 'None' is none is found."""
+        for k in dico:
+            if k.lower() == word.lower():
+                return k
+        return None
+
+    def get_sentence(self, chan, seed=None):
+        """Build a sentence from the graph of learned words. If a seed
+        (single word for now) is provided, we try to build a sentence
+        including it."""
+        if seed is None:
+            seed = self.begin_word
         else:
-            current_word = begin
-        sentence = current_word
-        current_word = self.get_random_next_word(chan, current_word)
-        while current_word != self.end_word:
-            sentence += ' ' + current_word
-            current_word = self.get_random_next_word(chan, current_word)
-        return sentence
+            seed = self.get_key_nocase(seed, self.dico[chan])
+            if seed is None:
+                return 'Je ne connais pas ce mot.'
+        # Build the start of the sentence (backward from seed).
+        sentence = self.extend_backward(chan, [seed])
+        # Build the end of the sentence (forward).
+        sentence = self.extend_forward(chan, sentence)
+        return ' '.join(sentence[1:-1])
 
     def get_stats(self, chan):
         return len(self.dico[chan])
@@ -125,17 +156,40 @@ class learn(stdPlugin):
     def get_blacklist(self):
         return self.blacklist
 
-    def add_successor_to_word(self, chan, word, successor):
-        if word not in self.dico[chan]:
-            self.dico[chan][word] = {}
-        if successor in self.dico[chan][word]:
-            self.dico[chan][word][successor] += 1
+    def add_relation(self, chan, dico, word, related):
+        if word not in dico[chan]:
+            dico[chan][word] = {}
+        if related in dico[chan][word]:
+            dico[chan][word][related] += 1
         else:
-            self.dico[chan][word][successor] = 1
+            dico[chan][word][related] = 1
 
-    def get_random_next_word(self, chan, word):
+    def extend_forward(self, chan, sentence):
+        """Extends the given list of words by adding words to the
+        end. The list we return always contains the special 'end'
+        symbol as its last element."""
+        current_word = sentence[-1]
+        while current_word != self.end_word:
+            current_word = self.extend_oneword(self.dico[chan], current_word)
+            sentence.append(current_word)
+        return sentence
+
+    def extend_backward(self, chan, sentence):
+        """Extends the given list of words by adding words to the
+        start. The list we return always contains the special 'begin'
+        symbol as its head."""
+        current_word = sentence[0]
+        extension = []
+        while current_word != self.begin_word:
+            current_word = self.extend_oneword(self.backward_dico[chan], current_word)
+            extension.append(current_word)
+        extension.reverse()
+        extension.extend(sentence)
+        return extension
+
+    def extend_oneword(self, dico, word):
         word_list = []
-        for key, weight in self.dico[chan][word].items():
+        for key, weight in dico[word].items():
             for i in range(0, weight):
                 word_list.append(key)
         result = random.choice(word_list)

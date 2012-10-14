@@ -81,16 +81,12 @@ class learn(stdPlugin):
     def parse(self, chan, sentence):
         sentences = re.split(self.end_chars, sentence)
         for sentence in sentences:
-            current_word = 0
+            current_word = 1
             words = sentence.split()
-            last_word = len(words) - 1
-            for word in words:
-                if current_word == 0:
-                    self.add_successor_to_word(chan, self.begin_word, word)
-                else:
-                    self.add_successor_to_word(chan, words[current_word-1], word)
-                if current_word == last_word:
-                    self.add_successor_to_word(chan, word, self.end_word)
+            words.insert(0, self.begin_word)
+            words.append(self.end_word)
+            for word in words[1:]:
+                self.add_successor_to_word(chan, words[current_word-1], word)
                 current_word += 1
         self.save_dico(chan)
 

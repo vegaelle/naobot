@@ -75,8 +75,29 @@ class learn(stdPlugin):
             serv.privmsg(helper['target'], u'Je ne connais pas cette commande.')
             return True
 
+    def build_backward_dico(self, chan):
+        """Rebuilds self.backward_dico[chan] from self.dico[chan].
+        Only used for compatibility with older versions of the plugin."""
+        res = {}
+        for word, next_words in self.dico[chan].items():
+            for next_word, weight in next_words.items():
+                if next_word not in res:
+                    res[next_word] = {}
+                try:
+                    res[next_word][word] += weight
+                except KeyError:
+                    res[next_word][word] = weight
+        return res
+
     def get_dico(self, chan):
-        self.dico[chan], self.backward_dico[chan] = self.bot.get_config(self, chan, ({}, {}))
+        data = self.bot.get_config(self, chan, ({}, {}))
+        # Compatibility with older versions
+        if isinstance(data, dict):
+            self.dico[chan] = data
+            self.backward_dico[chan] = self.build_backward_dico(chan)
+        else:
+            self.dico[chan] = data[0]
+            self.backward_dico[chan] = data[1]
 
     def save_dico(self, chan):
         return self.bot.write_config(self, chan, (self.dico[chan], self.backward_dico[chan]))

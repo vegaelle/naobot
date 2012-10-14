@@ -14,7 +14,10 @@ class learn(stdPlugin):
               'join': {'priority': 1, 'exclusive': False},
              }
 
+    # We need to be able to build sentences forward *and* backward
+    # from a given word.
     dico = {}
+    backward_dico = {}
     begin_word = '|BEGIN|'
     end_word = '|END|'
     cut_chars = '[,;:]'
@@ -73,10 +76,10 @@ class learn(stdPlugin):
             return True
 
     def get_dico(self, chan):
-        self.dico[chan] = self.bot.get_config(self, chan, {})
+        self.dico[chan], self.backward_dico[chan] = self.bot.get_config(self, chan, ({}, {}))
 
     def save_dico(self, chan):
-        return self.bot.write_config(self, chan, self.dico[chan])
+        return self.bot.write_config(self, chan, (self.dico[chan], self.backward_dico[chan]))
 
     def parse(self, chan, sentence):
         # We don't want to keep empty sentences
@@ -87,7 +90,8 @@ class learn(stdPlugin):
             words.insert(0, self.begin_word)
             words.append(self.end_word)
             for word in words[1:]:
-                self.add_successor_to_word(chan, words[current_word-1], word)
+                self.add_relation(chan, self.dico, words[current_word-1], word)
+                self.add_relation(chan, self.backward_dico, word, words[current_word-1])
                 current_word += 1
         self.save_dico(chan)
 
@@ -130,13 +134,13 @@ class learn(stdPlugin):
     def get_blacklist(self):
         return self.blacklist
 
-    def add_successor_to_word(self, chan, word, successor):
-        if word not in self.dico[chan]:
-            self.dico[chan][word] = {}
-        if successor in self.dico[chan][word]:
-            self.dico[chan][word][successor] += 1
+    def add_relation(self, chan, dico, word, related):
+        if word not in dico[chan]:
+            dico[chan][word] = {}
+        if related in dico[chan][word]:
+            dico[chan][word][related] += 1
         else:
-            self.dico[chan][word][successor] = 1
+            dico[chan][word][related] = 1
 
     def get_random_next_word(self, chan, word):
         word_list = []

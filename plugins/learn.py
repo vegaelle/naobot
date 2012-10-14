@@ -94,14 +94,22 @@ class learn(stdPlugin):
                 current_word += 1
         self.save_dico(chan)
 
+    def get_key_nocase(self, word, dico):
+        """Search for a key matching the given word (ignoring case).
+        Returns the key found, or 'None' is none is found."""
+        for k in dico:
+            if k.lower() == word.lower():
+                return k
+        return None
+
     def get_sentence(self, chan, begin=None):
         if begin is None:
             begin = self.begin_word
             current_word = self.get_random_next_word(chan, begin)
-        elif begin not in self.dico[chan]:
-            return 'Je ne connais pas ce mot.'
         else:
-            current_word = begin
+            current_word = self.get_key_nocase(begin, self.dico[chan])
+            if current_word is None:
+                return 'Je ne connais pas ce mot.'
         sentence = current_word
         current_word = self.get_random_next_word(chan, current_word)
         while current_word != self.end_word:

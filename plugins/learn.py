@@ -103,20 +103,21 @@ class learn(stdPlugin):
                 return k
         return None
 
-    def get_sentence(self, chan, begin=None):
-        if begin is None:
-            begin = self.begin_word
-            current_word = self.get_random_next_word(chan, begin)
+    def get_sentence(self, chan, seed=None):
+        """Build a sentence from the graph of learned words. If a seed
+        (single word for now) is provided, we try to build a sentence
+        including it."""
+        if seed is None:
+            seed = self.begin_word
         else:
-            current_word = self.get_key_nocase(begin, self.dico[chan])
-            if current_word is None:
+            seed = self.get_key_nocase(seed, self.dico[chan])
+            if seed is None:
                 return 'Je ne connais pas ce mot.'
-        sentence = current_word
-        current_word = self.get_random_next_word(chan, current_word)
-        while current_word != self.end_word:
-            sentence += ' ' + current_word
-            current_word = self.get_random_next_word(chan, current_word)
-        return sentence
+        # Build the start of the sentence (backward from seed).
+        sentence = self.extend_backward(chan, [seed])
+        # Build the end of the sentence (forward).
+        sentence = self.extend_forward(chan, sentence)
+        return ' '.join(sentence[1:-1])
 
     def get_stats(self, chan):
         return len(self.dico[chan])
@@ -142,9 +143,32 @@ class learn(stdPlugin):
         else:
             dico[chan][word][related] = 1
 
-    def get_random_next_word(self, chan, word):
+    def extend_forward(self, chan, sentence):
+        """Extends the given list of words by adding words to the
+        end. The list we return always contains the special 'end'
+        symbol as its last element."""
+        current_word = sentence[-1]
+        while current_word != self.end_word:
+            current_word = self.extend_oneword(self.dico[chan], current_word)
+            sentence.append(current_word)
+        return sentence
+
+    def extend_backward(self, chan, sentence):
+        """Extends the given list of words by adding words to the
+        start. The list we return always contains the special 'begin'
+        symbol as its head."""
+        current_word = sentence[0]
+        extension = []
+        while current_word != self.begin_word:
+            current_word = self.extend_oneword(self.backward_dico[chan], current_word)
+            extension.append(current_word)
+        extension.reverse()
+        extension.extend(sentence)
+        return extension
+
+    def extend_oneword(self, dico, word):
         word_list = []
-        for key, weight in self.dico[chan][word].items():
+        for key, weight in dico[word].items():
             for i in range(0, weight):
                 word_list.append(key)
         result = random.choice(word_list)

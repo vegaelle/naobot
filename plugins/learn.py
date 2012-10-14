@@ -79,7 +79,8 @@ class learn(stdPlugin):
         return self.bot.write_config(self, chan, self.dico[chan])
 
     def parse(self, chan, sentence):
-        sentences = re.split(self.end_chars, sentence)
+        # We don't want to keep empty sentences
+        sentences = [s for s in re.split(self.end_chars, sentence) if s]
         for sentence in sentences:
             current_word = 1
             words = sentence.split()

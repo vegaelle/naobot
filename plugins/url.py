@@ -10,9 +10,9 @@ from stdPlugin import stdPlugin
 class url(stdPlugin):
     u'''Récupère les URLs postées sur un chan et indique leur cible.'''
 
-    events = {'pubmsg': {'priority': 3, 'exclusive': False},
-              'privmsg': {'priority': 3, 'exclusive': False},
-              'action': {'priority': 3, 'exclusive': False},
+    events = {'pubmsg': {'priority': 1, 'exclusive': False},
+              'privmsg': {'priority': 1, 'exclusive': False},
+              'action': {'priority': 1, 'exclusive': False},
              }
 
 

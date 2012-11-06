@@ -34,7 +34,7 @@ class url(stdPlugin):
                             str_line += u'Page HTML sans titre'
                         else:
                             h = HTMLParser()
-                            str_line += h.unescape(title.text)
+                            str_line += h.unescape(title.text.replace('\n', ' '))
                     else:
                         str_line += u'Document %s' % content_type
                     if str_line:

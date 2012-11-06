@@ -10,7 +10,7 @@ from stdPlugin import stdPlugin
 class url(stdPlugin):
     u'''Récupère les URLs postées sur un chan et indique leur cible.'''
 
-    events = {'pubmsg': {'priority': 3, 'exclusive': False, 'command_namespace': 'url'}}
+    events = {'pubmsg': {'priority': 3, 'exclusive': False}}
 
 
     def on_pubmsg(self, serv, ev, helper):
@@ -48,7 +48,3 @@ class url(stdPlugin):
 
     def on_action(self, serv, ev, helper):
         return self.on_pubmsg(serv, ev, helper)
-
-    def on_cmd(self, serv, ev, command, args, helper):
-        u'''Retourne l’aide correspondant à chaque commande.'''
-        return false

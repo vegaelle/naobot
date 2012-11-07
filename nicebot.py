@@ -20,7 +20,7 @@ class Nicebot(bot.SingleServerIRCBot):
         for plugin_name in self.conf['plugins']:
             self.load_plugin(plugin_name)
 
-    def load_plugin(self, plugin_name):
+    def load_plugin(self, plugin_name, priority=None):
         try:
             if not re.match('^[a-z]*$', plugin_name):
                 raise Exception('Invalid plugin name')
@@ -40,7 +40,15 @@ class Nicebot(bot.SingleServerIRCBot):
                 except AssertionError:
                     self.events[e_name] = []
                 e_values['plugin'] = plugin_name
-                self.events[e_name].append(e_values)
+                plugin_index = dict((p['plugin'], i) for i, p in enumerate(self.events[e_name]))
+                try:
+                    plugin_index[plugin_name]
+                    self.events[e_name][plugin_index[plugin_name]] = e_values
+                except KeyError:
+                    if not priority:
+                        self.events[e_name].append(e_values)
+                    else:
+                        self.events[e_name].insert(int(priority), e_values)
         except (ImportError, Exception), e:
             print 'Unable to load plugin %s: %s' % (plugin_name, e.message)
             return False
@@ -52,11 +60,16 @@ class Nicebot(bot.SingleServerIRCBot):
     def unload_plugin(self, plugin_name):
         try:
             del self.registered_plugins[plugin_name]
-            for i in range(len(self.events)):
-                if self.events[i]['plugin'] == plugin_name:
-                    del self.events[i]
+            for name, ev in self.events.items():
+                to_del = []
+                for i in range(len(ev)):
+                    if ev[i]['plugin'] == plugin_name:
+                        to_del.insert(0, i)
+                for i in to_del:
+                    del ev[i]
             return True
-        except IndexError:
+        except IndexError as e:
+            print e
             return False
 
     def on_welcome(self, serv, ev):
@@ -80,10 +93,9 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.target()
                  }
         try:
-            assert isinstance(self.events['pubmsg'], dict)
+            assert isinstance(self.events['pubmsg'], list)
             answered = False
-            for key in sorted(self.events['pubmsg'].iterkeys()):
-                plugin_event = self.events['pubmsg'][key]
+            for plugin_event in self.events['pubmsg']:
                 if helper['message'].startswith(conf['command_prefix']):
                     try:
                         plugin_event['command_namespace']
@@ -114,10 +126,9 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.source().split('!')[0]
                  }
         try:
-            assert isinstance(self.events['privmsg'], dict)
+            assert isinstance(self.events['privmsg'], list)
             answered = False
-            for key in sorted(self.events['privmsg'].iterkeys()):
-                plugin_event = self.events['privmsg'][key]
+            for plugin_event in self.events['privmsg']:
                 if helper['message'].startswith(conf['command_prefix']):
                     try:
                         plugin_event['command_namespace']
@@ -147,10 +158,9 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.target()
                  }
         try:
-            assert isinstance(self.events['action'], dict)
+            assert isinstance(self.events['action'], list)
             answered = False
-            for key in sorted(self.events['action'].iterkeys()):
-                plugin_event = self.events['action'][key]
+            for plugin_event in self.events['action']:
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_action(serv, ev, helper)
         except (AssertionError, KeyError):
@@ -162,10 +172,9 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.target()
                  }
         try:
-            assert isinstance(self.events['join'], dict)
+            assert isinstance(self.events['join'], list)
             answered = False
-            for key in sorted(self.events['join'].iterkeys()):
-                plugin_event = self.events['join'][key]
+            for plugin_event in self.events['join']:
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_join(serv, ev, helper)
         except AssertionError, KeyError:
@@ -179,10 +188,9 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.target(),
                  }
         try:
-            assert isinstance(self.events['kick'], dict)
+            assert isinstance(self.events['kick'], list)
             answered = False
-            for key in sorted(self.events['kick'].iterkeys()):
-                plugin_event = self.events['kick'][key]
+            for plugin_event in self.events['kick']:
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_kick(serv, ev, helper)
         except (AssertionError, KeyError):

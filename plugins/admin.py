@@ -14,7 +14,7 @@ class admin(stdPlugin):
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s quit : termine sauvagement le bot.
         %(namespace)s list : indique les plugins activés.
-        %(namespace)s load <plugin> : charge et active un plugin.
+        %(namespace)s load <plugin> (<priorité>) : charge et active un plugin, en lui assignant optionnellement une priorité donnée.
         %(namespace)s unload <plugin> : désactive un plugin.
         %(namespace)s reload <plugin> : recharge un plugin, s’il a été modifié'
         %(namespace)s reload-all : recharge tous les plugins actifs, s’ils ont été modifiés'
@@ -32,7 +32,10 @@ class admin(stdPlugin):
             plugin_list = ', '.join(self.bot.registered_plugins.keys())
             serv.privmsg(helper['target'], u'Plugins chargés : %s' % plugin_list)
         elif command == 'load':
-            result = self.bot.load_plugin(args[0])
+            if len(args) == 2:
+                result = self.bot.load_plugin(args[0], args[1])
+            else:
+                result = self.bot.load_plugin(args[0])
             if result:
                 serv.privmsg(helper['target'], u'Plugin %s chargé' % args[0])
                 return True
@@ -49,7 +52,6 @@ class admin(stdPlugin):
                 serv.privmsg(helper['target'], u'Plugin %s désactivé' % args[0])
                 return True
             else:
-                print u'Erreur : le plugin %s est introuvable ou inactif' % args[0]
                 serv.privmsg(helper['target'], u'Erreur : le plugin %s est introuvable ou inactif' % args[0])
                 return True
         elif command == 'reload':

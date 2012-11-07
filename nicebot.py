@@ -94,7 +94,7 @@ class Nicebot(bot.SingleServerIRCBot):
                             message = helper['message']
                             helper['message'] = helper['message'][cmd_len:]
                             args = helper['message'].split(' ')
-                            command = args.pop(0).lower()
+                            command = args.pop(0)
                             answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
                             helper['message'] = message
                     except KeyError, e:
@@ -127,7 +127,7 @@ class Nicebot(bot.SingleServerIRCBot):
                             cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
                             helper['message'] = helper['message'][cmd_len:]
                             args = helper['message'].split(' ')
-                            command = args.pop(0).lower()
+                            command = args.pop(0)
                             answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
                     except KeyError:
                         pass

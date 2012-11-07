@@ -26,7 +26,8 @@ class learn(stdPlugin):
 
     def __init__(self, bot, conf):
         return_val = super(learn, self).__init__(bot, conf)
-        for chan in self.bot.channels:
+        chans = self.bot.conf['chans'] if not self.bot.channels else self.bot.channels
+        for chan in chans:
             self.get_dico(chan)
         return return_val
 

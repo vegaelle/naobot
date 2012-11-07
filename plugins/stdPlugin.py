@@ -29,7 +29,7 @@ class stdPlugin(object):
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''Retourne l’aide correspondant à chaque commande.'''
-        return false
+        return False
 
     def say(self, serv, target, message):
         if message.startswith('/me '):

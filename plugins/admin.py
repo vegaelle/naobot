@@ -7,8 +7,8 @@ class admin(stdPlugin):
     u'''Permet d’administrer le bot. Les commandes, sauf mention contraire, sont réservées aux administrateurs.'''
 
     events = {
-            'pubmsg': {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'},
-            'privmsg': {'priority': 0, 'exclusive': True, 'command_namespace': 'sudo'},
+            'pubmsg': {'exclusive': True, 'command_namespace': 'sudo'},
+            'privmsg': {'exclusive': True, 'command_namespace': 'sudo'},
         }
 
     def on_cmd(self, serv, ev, command, args, helper):

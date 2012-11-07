@@ -9,11 +9,11 @@ class discuss(stdPlugin):
     u'''Tente d’engager la conversation sur un canal.'''
 
     events = {
-            'pubmsg': {'priority': 9999, 'exclusive': True},
-            'privmsg': {'priority': 9999, 'exclusive': True},
-            'action': {'priority': 9999, 'exclusive': True},
-            'join': {'priority': 9999, 'exclusive': True},
-            'kick': {'priority': 9999, 'exclusive': True},
+            'pubmsg': {'exclusive': True},
+            'privmsg': {'exclusive': True},
+            'action': {'exclusive': True},
+            'join': {'exclusive': True},
+            'kick': {'exclusive': True},
         }
 
     def random_sentence(self, serv, ev, helper, type, vars):

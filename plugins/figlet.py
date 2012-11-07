@@ -6,7 +6,7 @@ from stdPlugin import stdPlugin
 class figlet(stdPlugin):
     u'''Écrit en mode figlet, qui a pour principal intérêt de flooder un canal.'''
 
-    events = {'pubmsg': {'priority': 5, 'exclusive': True, 'command_namespace': 'figlet'}}
+    events = {'pubmsg': {'exclusive': True, 'command_namespace': 'figlet'}}
     width = 80 # max nb of characters per line
 
     def on_cmd(self, serv, ev, command, args, helper):

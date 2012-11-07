@@ -7,11 +7,10 @@ from stdPlugin import stdPlugin
 class learn(stdPlugin):
     u'''Apprend continuellement les mots utilisés sur un canal, et génère des phrases aléatoires et stupides.'''
 
-    events = {'pubmsg': {'priority': 1, 'exclusive': False, 'command_namespace': 'say'},
-              'privmsg': {'priority': 1, 'exclusive': False, 'command_namespace': 'say'},
-              'action': {'priority': 1, 'exclusive': False},
-
-              'join': {'priority': 1, 'exclusive': False},
+    events = {'pubmsg': {'exclusive': False, 'command_namespace': 'say'},
+              'privmsg': {'exclusive': False, 'command_namespace': 'say'},
+              'action': {'exclusive': False},
+              'join': {'exclusive': False},
              }
 
     # We need to be able to build sentences forward *and* backward

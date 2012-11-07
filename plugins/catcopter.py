@@ -5,7 +5,7 @@ from stdPlugin import stdPlugin
 class catcopter(stdPlugin):
     u'''Apporte un moyen de locomotion novateur et efficace'''
 
-    events = {'pubmsg': {'priority': 4, 'exclusive': True, 'command_namespace': 'catcopter'}}
+    events = {'pubmsg': {'exclusive': True, 'command_namespace': 'catcopter'}}
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s : dessine un catcopter'''

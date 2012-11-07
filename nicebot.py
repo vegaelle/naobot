@@ -34,13 +34,13 @@ class Nicebot(bot.SingleServerIRCBot):
             self.registered_plugins[plugin_name] = plugin(self, plugin_conf)
             for e_name, e_values in plugin.events.items():
                 if e_name not in self.events:
-                    self.events[e_name] = {}
+                    self.events[e_name] = []
                 try:
-                    assert isinstance(self.events[e_name], dict)
+                    assert isinstance(self.events[e_name], list)
                 except AssertionError:
-                    self.events[e_name] = {}
+                    self.events[e_name] = []
                 e_values['plugin'] = plugin_name
-                self.events[e_name][int(e_values['priority'])] = e_values
+                self.events[e_name].append(e_values)
         except (ImportError, Exception), e:
             print 'Unable to load plugin %s: %s' % (plugin_name, e.message)
             return False

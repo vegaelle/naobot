@@ -5,7 +5,7 @@ import re
 class stdPlugin(object):
     u'''Permet de créer des plugins.'''
 
-    #events = {'pubmsg': {'priority': 9999, 'exclusive': True, 'command_namespace': 'say'}}
+    #events = {'pubmsg': {'exclusive': True, 'command_namespace': 'say'}}
     events = {}
 
     def __init__(self, bot, conf):

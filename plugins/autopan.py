@@ -5,7 +5,7 @@ from stdPlugin import stdPlugin
 class autopan(stdPlugin):
     u'''Réagit pragmatiquement aux invasions palmipèdes sur les canaux.'''
 
-    events = {'pubmsg': {'priority': 3, 'exclusive': True}}
+    events = {'pubmsg': {'exclusive': True}}
 
     targets = (
             ('coin', 'pan'),

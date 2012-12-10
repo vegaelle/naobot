@@ -24,7 +24,7 @@ class url(stdPlugin):
                 try:
                     str_line = ''
                     req = requests.get(url)
-                    if req.url is not url:
+                    if req.url is not url and req.url+'/' is not url:
                         str_line += u'%s ' % req.url
                     content_type = req.headers['content-type'].split(';')[0].lower()
                     if content_type == 'text/html':

@@ -40,7 +40,7 @@ class url(stdPlugin):
                     if str_line:
                         serv.privmsg(helper['target'], str_line)
                         answered = True
-                except requests.ConnectionError as e:
+                except Exception as e:
                     serv.privmsg(helper['target'], u'Erreur de connexion à %s' % url)
         if answered:
             return True

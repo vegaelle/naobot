@@ -2,6 +2,9 @@
 
 import re
 
+class PluginError(exception):
+    pass
+
 class stdPlugin(object):
     u'''Permet de créer des plugins.'''
 

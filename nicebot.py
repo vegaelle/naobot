@@ -6,6 +6,7 @@ import argparse
 import re
 import pickle
 from irc import bot
+from plugins.stdPlugin import PluginError
 
 #from settings import conf, plugins_conf
 

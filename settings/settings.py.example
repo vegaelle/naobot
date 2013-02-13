@@ -9,4 +9,8 @@ conf = {'server': [('irc.geeknode.org', 6667)],
         'plugins': ['admin', 'autopan', 'catcopter', 'discuss']}
 
 plugins_conf = {'admin': {'admins': ['Gordon']},
-                'microblogging': {'username': '', 'password': '', 'host': ''}}
+                'microblogging': {'token': '',
+                                  'token_secret': '',
+                                  'consumer_key': '',
+                                  'consumer_secret': ''}
+                }

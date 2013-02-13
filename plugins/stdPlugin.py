@@ -2,7 +2,7 @@
 
 import re
 
-class PluginError(exception):
+class PluginError(Exception):
     pass
 
 class stdPlugin(object):

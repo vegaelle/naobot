@@ -8,39 +8,36 @@ class microblogging(stdPlugin):
 
     events = {'pubmsg': {'exclusive': True, 'command_namespace': 'tweet'}}
 
+    status_length = 140
+
     def __init__(self, bot, conf):
-        return_val = super(quote, self).__init__(bot, conf)
-        self.api = twitter.Twitter(auth=twitter.Oauth(**conf))
+        return_val = super(microblogging, self).__init__(bot, conf)
+        self.api = twitter.Twitter(auth=twitter.OAuth(**conf))
         if not self.api.account.verify_credentials():
             raise PluginError('Invalid microblogging credentials!')
         return return_val
 
+    def send_status(self, message):
+        self.api.statuses.update(status=message)
+        return True
+
     def on_cmd(self, serv, ev, command, args, helper):
-        u'''%(namespace)s <phrase> : enregistre une phrase ridicule prononcée
-        par un membre du chan.
-        %(namespace)s : sélectionne une phrase de la liste.
-        %(namespace)s #<id> : sélectionne la phrase d’un id donné.
-        %(namespace)s ?<mot-clé> : sélectionne une phrase contenant le mot-clé'''
+        u'''%(namespace)s <> : Publie un message de microblogging
+        '''
         if not command:
-            quote = self.get_random_quote(helper['target'])
-            return self.say_quote(serv, helper['target'], quote)
-        elif command.startswith('#'):
-            quote = self.get_quote(helper['target'], command[1:])
-            return self.say_quote(serv, helper['target'], quote)
-        elif command.startswith('?'):
-            args.insert(0, command)
-            keyword = ' '.join(args)[1:]
-            quotes = self.search_quote(helper['target'], keyword)
-            if quotes:
-                quote = random.choice(quotes)
-                return self.say_quote(serv, helper['target'], quote)
-            else:
-                return self.say_quote(serv, helper['target'], None)
+            return False
         else:
             args.insert(0, command)
-            quote = ' '.join(args)
-            id = self.add_quote(helper['target'], quote, helper['sender'])
-            if id:
-                serv.privmsg(helper['target'], u'Quote enregistrée ! ID %d' % id)
+            message = ' '.join(args)
+            if len(message) > self.status_length:
+                serv.privmsg(helper['target'], u'Trop gros, passera '\
+                            +u'pas (%d caractères)' % len(message))
                 return True
+            try:
+                self.send_status(message)
+                serv.privmsg(helper['target'], u'C’est envoyé !')
+                return True
+            except Exception, e:
+                serv.privmsg(helper['target'], u'Erreur lors de '\
+                                               +u'l’envoi : %s' % e)
         return False

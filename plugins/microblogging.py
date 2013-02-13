@@ -39,5 +39,6 @@ class microblogging(stdPlugin):
                 return True
             except Exception, e:
                 serv.privmsg(helper['target'], u'Erreur lors de '\
-                                               +u'l’envoi : %s' % e)
+                                               +u'l’envoi : %s' %
+                                               e.message.replace('\n', ' '))
         return False

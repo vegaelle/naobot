@@ -34,6 +34,15 @@ class quote(stdPlugin):
         self.save_dico(chan)
         return id
 
+    def del_quote(self, chan, id):
+        dico_index = dict((q['id'], i) for (i, q) in enumerate(self.dico[chan]))
+        quote_index = dico_index.get(int(id), -1)
+        if quote_index == -1:
+            return None
+        else:
+            del self.dico[chan][quote_index]
+            self.save_dico(chan)
+
     def get_quote(self, chan, id):
         dico_index = dict((q['id'], i) for (i, q) in enumerate(self.dico[chan]))
         quote_index = dico_index.get(int(id), -1)
@@ -67,7 +76,8 @@ class quote(stdPlugin):
         u'''%(namespace)s <phrase> : enregistre une phrase ridicule prononcée par un membre du chan.
         %(namespace)s : sélectionne une phrase de la liste.
         %(namespace)s #<id> : sélectionne la phrase d’un id donné.
-        %(namespace)s ?<mot-clé> : sélectionne une phrase contenant le mot-clé'''
+        %(namespace)s ?<mot-clé> : sélectionne une phrase contenant le mot-clé
+        %(namespace)s !<id> : supprime une phrase donnée (réservée aux admins)'''
         try:
             if not command:
                 quote = self.get_random_quote(helper['target'])
@@ -84,6 +94,13 @@ class quote(stdPlugin):
                     return self.say_quote(serv, helper['target'], quote)
                 else:
                     return self.say_quote(serv, helper['target'], None)
+            elif command.startswith('!'):
+                if 'admin' in self.bot.registered_plugins:
+                    if self.bot.registered_plugins['admin'].is_admin(ev.source()):
+                        self.del_quote(helper['target'], command[1:])
+                        serv.privmsg(helper['target'], u'Quote supprimée.')
+                    else:
+                        serv.privmsg(helper['target'], 'Leave my quote alone!')
             else:
                 args.insert(0, command)
                 quote = ' '.join(args)
@@ -91,6 +108,6 @@ class quote(stdPlugin):
                 if id:
                     serv.privmsg(helper['target'], u'Quote enregistrée ! ID %d' % id)
                     return True
-        except:
+        except Exception, e:
             serv.privmsg(helper['target'], u'Nope.')
         return False

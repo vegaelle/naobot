@@ -11,6 +11,13 @@ class admin(stdPlugin):
             'privmsg': {'exclusive': True, 'command_namespace': 'sudo'},
         }
 
+    def is_admin(self, nick):
+        sender = nick.split('!')[0]
+        if sender in self.conf['admins']:
+            return True
+        else:
+            return False
+
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s quit : termine sauvagement le bot.
         %(namespace)s list : indique les plugins activés.
@@ -21,8 +28,7 @@ class admin(stdPlugin):
         %(namespace)s join <chan> : rejoint un canal.
         %(namespace)s leave <chan> : quitte un canal.
         %(namespace)s chans : indique la liste des canaux actifs.'''
-        sender = ev.source().split('!')[0]
-        if sender not in self.conf['admins']:
+        if not self.is_admin(ev.source()):
             serv.privmsg(helper['target'], u'Nope.')
             return True
         if command == 'quit':

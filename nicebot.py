@@ -20,20 +20,20 @@ class Nicebot(bot.SingleServerIRCBot):
     def __init__(self, conf, plugins_conf):
         self.conf = conf
         bot.SingleServerIRCBot.__init__(self, self.conf['server'], self.conf['nick'], self.conf['fullname'])
+        self.runs = {}
         for plugin_name in self.conf['plugins']:
             self.load_plugin(plugin_name)
 
-        self.runs = {}
-        if isinstance(self.events['run'], list):
-            for chan_name in self.conf['chans']:
-                self.runs[chan_name] = {}
-                for plugin_event in self.events['run']:
-                    if isinstance(plugin_event['frequency'], tuple):
-                        self.runs[chan_name][plugin_event['plugin']] = datetime.datetime.now() +\
-                            datetime.timedelta(0, random.randint(*plugin_event['frequency']))
-                    else:
-                        self.runs[chan_name][plugin_event['plugin']] = datetime.datetime.now() +\
-                            datetime.timedelta(0, plugin_event['frequency'])
+        #if isinstance(self.events['run'], list):
+        #    for chan_name in self.conf['chans']:
+        #        self.runs[chan_name] = {}
+        #        for plugin_event in self.events['run']:
+        #            if isinstance(plugin_event['frequency'], tuple):
+        #                self.runs[chan_name][plugin_event['plugin']] = datetime.datetime.now() +\
+        #                    datetime.timedelta(0, random.randint(*plugin_event['frequency']))
+        #            else:
+        #                self.runs[chan_name][plugin_event['plugin']] = datetime.datetime.now() +\
+        #                    datetime.timedelta(0, plugin_event['frequency'])
 
     def load_plugin(self, plugin_name, priority=None):
         try:
@@ -64,6 +64,17 @@ class Nicebot(bot.SingleServerIRCBot):
                         self.events[e_name].append(e_values)
                     else:
                         self.events[e_name].insert(int(priority), e_values)
+                if e_name == 'run':
+                    for chan_name in self.conf['chans']:
+                        if chan_name not in self.runs:
+                            self.runs[chan_name] = {}
+                        if isinstance(e_values['frequency'], tuple):
+                            self.runs[chan_name][plugin_name] = datetime.datetime.now() +\
+                                datetime.timedelta(0, random.randint(*e_values['frequency']))
+                        else:
+                            self.runs[chan_name][plugin_name] = datetime.datetime.now() +\
+                                datetime.timedelta(0, e_values['frequency'])
+
         except (ImportError, Exception), e:
             print 'Unable to load plugin %s: %s' % (plugin_name, e.message)
             return False
@@ -132,7 +143,7 @@ class Nicebot(bot.SingleServerIRCBot):
                             answered = answered or self.registered_plugins[plugin_event['plugin']].on_pubmsg(serv, ev, helper)
                         except KeyError, e: # si on désactive le plugin, ça n’arrête pas la boucle
                             print '%s: %s' % (e.__class__.__name__, e.message)
-        except (AssertionError, KeyError), e:
+        except Exception, e:
             print '%s: %s' % (e.__class__.__name__, e.message)
 
     def on_privmsg(self, serv, ev):
@@ -163,7 +174,7 @@ class Nicebot(bot.SingleServerIRCBot):
                             answered = answered or self.registered_plugins[plugin_event['plugin']].on_privmsg(serv, ev, helper)
                         except KeyError: # si on désactive le plugin, ça n’arrête pas la boucle
                             pass
-        except (AssertionError, KeyError):
+        except Exception, e:
             pass
 
     def on_action(self, serv, ev):
@@ -178,7 +189,7 @@ class Nicebot(bot.SingleServerIRCBot):
             for plugin_event in self.events['action']:
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_action(serv, ev, helper)
-        except (AssertionError, KeyError):
+        except Exception, e:
             pass
 
     def on_join(self, serv, ev):
@@ -192,7 +203,7 @@ class Nicebot(bot.SingleServerIRCBot):
             for plugin_event in self.events['join']:
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_join(serv, ev, helper)
-        except AssertionError, KeyError:
+        except Exception, e:
             pass
 
     def on_kick(self, serv, ev):
@@ -208,7 +219,7 @@ class Nicebot(bot.SingleServerIRCBot):
             for plugin_event in self.events['kick']:
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_kick(serv, ev, helper)
-        except (AssertionError, KeyError):
+        except Exception, e:
             pass
 
     def on_run(self, serv, ev):
@@ -228,7 +239,7 @@ class Nicebot(bot.SingleServerIRCBot):
                             self.runs[chan_name][plugin_event['plugin']] += \
                                 datetime.timedelta(0, plugin_event['frequency'])
 
-            except (AssertionError, KeyError):
+            except Exception, e:
                 pass
 
     def get_config(self, plugin, name, default=None):

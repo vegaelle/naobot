@@ -64,6 +64,7 @@ class admin(stdPlugin):
             try:
                 reload(sys.modules['plugins.'+args[0]])
                 self.bot.load_plugin(args[0])
+                serv.privmsg(helper['target'], u'Plugin %s rechargé' % args[0])
             except KeyError:
                 serv.privmsg(helper['target'], u'Erreur : le plugin %s est introuvable ou inactif' % args[0])
             return False
@@ -72,6 +73,7 @@ class admin(stdPlugin):
                 for plugin in self.bot.registered_plugins:
                     reload(sys.modules['plugins.'+plugin])
                     self.bot.load_plugin(plugin)
+                    serv.privmsg(helper['target'], u'Plugin %s rechargé' % args[0])
             except KeyError:
                 serv.privmsg(helper['target'], u'Erreur : le plugin %s est introuvable ou inactif' % plugin)
             return False

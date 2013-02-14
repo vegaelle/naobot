@@ -11,6 +11,7 @@ class learn(stdPlugin):
               'privmsg': {'exclusive': False, 'command_namespace': 'say'},
               'action': {'exclusive': False},
               'join': {'exclusive': False},
+              'run': {'frequency': (300, 3000)},
              }
 
     # We need to be able to build sentences forward *and* backward
@@ -194,3 +195,6 @@ class learn(stdPlugin):
                 word_list.append(key)
         result = random.choice(word_list)
         return result
+
+    def on_run(self, serv, helper):
+        serv.privmsg(helper['target'], self.get_sentence(helper['target']))

@@ -22,7 +22,7 @@ class microblogging(stdPlugin):
         return True
 
     def on_cmd(self, serv, ev, command, args, helper):
-        u'''%(namespace)s <> : Publie un message de microblogging
+        u'''%(namespace)s <message> : Publie un message de microblogging
         '''
         if not command:
             return False

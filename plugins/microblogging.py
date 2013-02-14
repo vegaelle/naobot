@@ -52,5 +52,5 @@ class microblogging(stdPlugin):
         for mention in mentions:
             serv.privmsg(helper['target'], u'@%s : %s' % \
                     (mention['user']['screen_name'], mention['text']))
-        self.last_fetch = mentions[-1]['id']
+        self.last_fetch = mentions[0]['id']
         self.bot.write_config(self, 'last_fetch', self.last_fetch)

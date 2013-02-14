@@ -23,7 +23,7 @@ class url(stdPlugin):
             for url in urls:
                 try:
                     str_line = ''
-                    req = requests.get(url)
+                    req = requests.get(url, verify=False)
                     if req.url is not url and req.url+'/' is not url:
                         str_line += u'%s ' % req.url
                     content_type = req.headers['content-type'].split(';')[0].lower()

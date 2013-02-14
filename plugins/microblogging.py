@@ -6,7 +6,7 @@ from stdPlugin import stdPlugin, PluginError
 class microblogging(stdPlugin):
     u'''Permet d’interagir avec un compte de microblogging (statusnet/twitter)'''
 
-    events = {'pubmsg': {'exclusive': True, 'command_namespace': 'tweet'}}
+    events = {'pubmsg': {'exclusive': True, 'command_namespace': 'truite'}}
 
     status_length = 140
 

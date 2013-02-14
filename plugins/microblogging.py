@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 import twitter
 from stdPlugin import stdPlugin, PluginError
 
@@ -16,7 +17,7 @@ class microblogging(stdPlugin):
         self.api = twitter.Twitter(auth=twitter.OAuth(**conf))
         if not self.api.account.verify_credentials():
             raise PluginError('Invalid microblogging credentials!')
-        return return_val
+        self.last_fetch = self.bot.get_config(self, 'last_fetch', None)
 
     def send_status(self, message):
         self.api.statuses.update(status=message)
@@ -44,4 +45,11 @@ class microblogging(stdPlugin):
         return False
 
     def on_run(self, serv, helper):
-        pass
+        params = {}
+        if self.last_fetch:
+            params['since_id'] = self.last_fetch
+        mentions = self.api.statuses.mentions_timeline(**params)
+        for mention in mentions:
+            serv.privmsg(helper['target'], u'@%s : %s' % \
+                    (mention['user']['screen_name'], mention['text']))
+        self.bot.write_config(self, 'last_fetch', mentions[-1]['id'])

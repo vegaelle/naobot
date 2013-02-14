@@ -5,6 +5,8 @@ import os
 import argparse
 import re
 import pickle
+import datetime
+import random
 from irc import bot
 from plugins.stdPlugin import PluginError
 
@@ -20,6 +22,18 @@ class Nicebot(bot.SingleServerIRCBot):
         bot.SingleServerIRCBot.__init__(self, self.conf['server'], self.conf['nick'], self.conf['fullname'])
         for plugin_name in self.conf['plugins']:
             self.load_plugin(plugin_name)
+
+        self.runs = {}
+        if isinstance(self.events['run'], list):
+            for chan_name in self.conf['chans']:
+                self.runs[chan_name] = {}
+                for plugin_event in self.events['run']:
+                    if isinstance(plugin_event['frequency'], tuple):
+                        self.runs[chan_name][plugin_event['plugin']] = datetime.datetime.now() +\
+                            datetime.timedelta(0, random.randint(*plugin_event['frequency']))
+                    else:
+                        self.runs[chan_name][plugin_event['plugin']] = datetime.datetime.now() +\
+                            datetime.timedelta(0, plugin_event['frequency'])
 
     def load_plugin(self, plugin_name, priority=None):
         try:
@@ -196,6 +210,26 @@ class Nicebot(bot.SingleServerIRCBot):
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_kick(serv, ev, helper)
         except (AssertionError, KeyError):
             pass
+
+    def on_run(self, serv, ev):
+        for chan_name, chan in self.channels.items():
+            helper = {'chan': chan,
+                      'target': chan_name
+                     }
+            try:
+                assert isinstance(self.events['run'], list)
+                for plugin_event in self.events['run']:
+                    if datetime.datetime.now() >= self.runs[chan_name][plugin_event['plugin']]:
+                        self.registered_plugins[plugin_event['plugin']].on_run(serv, helper)
+                        if isinstance(plugin_event['frequency'], tuple):
+                            self.runs[chan_name][plugin_event['plugin']] += \
+                                datetime.timedelta(0, random.randint(*plugin_event['frequency']))
+                        else:
+                            self.runs[chan_name][plugin_event['plugin']] += \
+                                datetime.timedelta(0, plugin_event['frequency'])
+
+            except (AssertionError, KeyError):
+                pass
 
     def get_config(self, plugin, name, default=None):
         try:

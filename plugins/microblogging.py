@@ -6,7 +6,8 @@ from stdPlugin import stdPlugin, PluginError
 class microblogging(stdPlugin):
     u'''Permet d’interagir avec un compte de microblogging (statusnet/twitter)'''
 
-    events = {'pubmsg': {'exclusive': True, 'command_namespace': 'truite'}}
+    events = {'pubmsg': {'exclusive': True, 'command_namespace': 'truite'},
+              'run': {'frequency': 300}}
 
     status_length = 140
 
@@ -39,6 +40,8 @@ class microblogging(stdPlugin):
                 return True
             except Exception, e:
                 serv.privmsg(helper['target'], u'Erreur lors de '\
-                                               +u'l’envoi : %s' %
-                                               e.message.replace('\n', ' '))
+                                               +u'l’envoi : %s' % e)
         return False
+
+    def on_run(self, serv, helper):
+        pass

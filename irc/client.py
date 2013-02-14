@@ -214,6 +214,14 @@ class IRC(object):
                 if s == c._get_socket():
                     c.process_data()
 
+    def process_run(self):
+        """Called continuously, for spontaneous handlers.
+        """
+        with self.mutex:
+            log.log(logging.DEBUG-2, "process_run()")
+            for c in self.connections:
+                c.process_run()
+
     def process_timeout(self):
         """Called when a timeout notification is due.
 
@@ -249,6 +257,7 @@ class IRC(object):
                 self.process_data(i)
             else:
                 time.sleep(timeout)
+            self.process_run()
             self.process_timeout()
 
     def process_forever(self, timeout=0.2):
@@ -761,6 +770,10 @@ class ServerConnection(Connection):
                 log.debug("command: %s, source: %s, target: %s, "
                     "arguments: %s", command, prefix, target, arguments)
                 self._handle_event(Event(command, NickMask(prefix), target, arguments))
+
+    def process_run(self):
+        """[Internal]"""
+        self._handle_event(Event('run', '', '', []))
 
     def _handle_event(self, event):
         """[Internal]"""

@@ -74,7 +74,7 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         self._nickname = nickname
         self._realname = realname
         for i in ["disconnect", "join", "kick", "mode",
-                  "namreply", "nick", "part", "quit"]:
+                  "namreply", "nick", "part", "quit", "run"]:
             self.connection.add_global_handler(i,
                                                getattr(self, "_on_" + i),
                                                -20)
@@ -174,6 +174,9 @@ class SingleServerIRCBot(irc.client.SimpleIRCClient):
         for ch in self.channels.values():
             if ch.has_user(nick):
                 ch.remove_user(nick)
+
+    def _on_run(self, c, e):
+        pass
 
     def die(self, msg="Bye, cruel world!"):
         """Let the bot die.

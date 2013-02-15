@@ -33,7 +33,10 @@ class ponies(stdPlugin):
     def on_pubmsg(self, serv, ev, helper):
         for pony in self.ponies.keys():
             if pony.lower() in helper['message'].lower():
-                self.stats[helper['target']][pony] += 1
+                try:
+                    self.stats[helper['target']][pony] += 1
+                except KeyError:
+                    self.stats[helper['target']][pony] = 1
                 self.bot.write_config(self, helper['target'], self.stats[helper['target']])
         return False
 

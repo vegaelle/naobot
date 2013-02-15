@@ -36,7 +36,7 @@ class microblogging(stdPlugin):
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s <message> : Publie un message de microblogging
-        %(namespace)s ?<ID> : Publie un message en réponse à un message donné
+        %(namespace)s ?<ID> <message> : Publie un message en réponse à un message donné
         %(namespace)s +<ID> : Répète le message donné
         %(namespace)s !<ID> : Supprime le message donné (réservé aux admins)
         '''

@@ -20,8 +20,8 @@ class microblogging(stdPlugin):
         self.last_fetch = self.bot.get_config(self, 'last_fetch', None)
 
     def send_status(self, message):
-        self.api.statuses.update(status=message)
-        return True
+        result = self.api.statuses.update(status=message)
+        return result['id']
 
     def del_status(self, id):
         self.api.statuses.destroy(id=id)
@@ -35,9 +35,14 @@ class microblogging(stdPlugin):
             return False
         elif command.startswith('!'):
             if 'admin' in self.bot.registered_plugins:
-                if self.bot.registered_plugins['admin'].is_admin(ev.source()):
-                    self.del_status(command[1:])
-                    serv.privmsg(helper['target'], u'Message supprimé.')
+                try:
+                    if self.bot.registered_plugins['admin'].is_admin(ev.source()):
+                        self.del_status(command[1:])
+                        serv.privmsg(helper['target'], u'Message supprimé.')
+                except:
+                    serv.privmsg(helper['target'], u'Fail.')
+            else:
+                serv.privmsg(helper['target'], u'Nope.')
         else:
             args.insert(0, command)
             message = ' '.join(args)
@@ -46,8 +51,8 @@ class microblogging(stdPlugin):
                             +u'pas (%d caractères)' % len(message))
                 return True
             try:
-                self.send_status(message)
-                serv.privmsg(helper['target'], u'C’est envoyé !')
+                id = self.send_status(message)
+                serv.privmsg(helper['target'], u'C’est envoyé (%d) !' % id)
                 return True
             except Exception, e:
                 serv.privmsg(helper['target'], u'Erreur lors de '\
@@ -59,8 +64,9 @@ class microblogging(stdPlugin):
         if self.last_fetch:
             params['since_id'] = self.last_fetch
         mentions = self.api.statuses.mentions_timeline(**params)
+        self.last_fetch = mentions[0]['id']
+        mentions.reverse()
         for mention in mentions:
             serv.privmsg(helper['target'], u'@%s : %s' % \
                     (mention['user']['screen_name'], mention['text']))
-        self.last_fetch = mentions[0]['id']
         self.bot.write_config(self, 'last_fetch', self.last_fetch)

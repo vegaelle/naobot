@@ -97,6 +97,6 @@ class microblogging(stdPlugin):
         self.last_fetch = mentions[0]['id']
         mentions.reverse()
         for mention in mentions:
-            serv.privmsg(helper['target'], u'@%s : %s' % \
-                    (mention['user']['screen_name'], mention['text']))
+            serv.privmsg(helper['target'], u'@%s : %s (%d)' % \
+                    (mention['user']['screen_name'], mention['text'], mention['id']))
         self.bot.write_config(self, 'last_fetch', self.last_fetch)

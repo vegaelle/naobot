@@ -37,7 +37,7 @@ class microblogging(stdPlugin):
             if 'admin' in self.bot.registered_plugins:
                 if self.bot.registered_plugins['admin'].is_admin(ev.source()):
                     self.del_status(command[1:])
-                    serv.privmsg(helper['target'], u'Message supprimée.')
+                    serv.privmsg(helper['target'], u'Message supprimé.')
         else:
             args.insert(0, command)
             message = ' '.join(args)

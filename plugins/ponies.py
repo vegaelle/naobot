@@ -56,7 +56,7 @@ class ponies(stdPlugin):
             serv.privmsg(helper['target'], u'Ponies rating:')
             for pony in enumerate(stats):
                 serv.privmsg(helper['target'], u'    %d. %s: %d' % \
-                    (pony[0], pony[1]['name'], pony[1]['score']))
+                    ((pony[0]+1), pony[1]['name'], pony[1]['score']))
             return True
         else:
             serv.privmsg(helper['target'], u'Je ne connais pas cette commande.')

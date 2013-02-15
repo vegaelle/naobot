@@ -24,7 +24,7 @@ class microblogging(stdPlugin):
         return True
 
     def del_status(self, id):
-        self.api.destroy(id=id)
+        self.api.statuses.destroy(id=id)
         return True
 
     def on_cmd(self, serv, ev, command, args, helper):
@@ -36,7 +36,7 @@ class microblogging(stdPlugin):
         elif command.startswith('!'):
             if 'admin' in self.bot.registered_plugins:
                 if self.bot.registered_plugins['admin'].is_admin(ev.source()):
-                    self.del_status(helper['target'], command[1:])
+                    self.del_status(command[1:])
                     serv.privmsg(helper['target'], u'Message supprimée.')
         else:
             args.insert(0, command)

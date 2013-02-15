@@ -23,11 +23,21 @@ class microblogging(stdPlugin):
         self.api.statuses.update(status=message)
         return True
 
+    def del_status(self, id):
+        self.api.destroy(id=id)
+        return True
+
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s <message> : Publie un message de microblogging
+        %(namespace)s !<ID> : Supprime le message donné (réservé aux admins)
         '''
         if not command:
             return False
+        elif command.startswith('!'):
+            if 'admin' in self.bot.registered_plugins:
+                if self.bot.registered_plugins['admin'].is_admin(ev.source()):
+                    self.del_status(helper['target'], command[1:])
+                    serv.privmsg(helper['target'], u'Message supprimée.')
         else:
             args.insert(0, command)
             message = ' '.join(args)

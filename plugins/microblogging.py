@@ -44,10 +44,6 @@ class microblogging(stdPlugin):
             return False
         elif command.startswith('?'):
             message = ' '.join(args)
-            if len(message) > self.status_length:
-                serv.privmsg(helper['target'], u'trop gros, passera '\
-                            +u'pas (%d caractères)' % len(message))
-                return True
             try:
                 id = self.send_status(message, command[1:])
                 serv.privmsg(helper['target'], u'c’est envoyé (%d) !' % id)
@@ -76,10 +72,6 @@ class microblogging(stdPlugin):
         else:
             args.insert(0, command)
             message = ' '.join(args)
-            if len(message) > self.status_length:
-                serv.privmsg(helper['target'], u'trop gros, passera '\
-                            +u'pas (%d caractères)' % len(message))
-                return True
             try:
                 id = self.send_status(message)
                 serv.privmsg(helper['target'], u'c’est envoyé (%d) !' % id)

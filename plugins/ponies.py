@@ -10,6 +10,7 @@ class ponies(stdPlugin):
 
     events = {'pubmsg': {'exclusive': False, 'command_namespace': 'ponies'},
               'action': {'exclusive': False},
+              'join': {'exclusive': False},
              }
 
 
@@ -28,6 +29,7 @@ class ponies(stdPlugin):
                 self.stats[chan] = self.bot.get_config(self, chan, dict.fromkeys(self.ponies, 0))
         except Exception, e:
             raise PluginError('No ponies found: %s.' % e)
+        self.users = self.bot.get_config(self, 'users', [])
         return return_val
 
     def on_pubmsg(self, serv, ev, helper):
@@ -60,6 +62,15 @@ class ponies(stdPlugin):
             return True
         else:
             serv.privmsg(helper['target'], u'Je ne connais pas cette commande.')
+            return True
+
+    def on_join(self, serv, ev, helper):
+        if helper['sender'] not in self.users and \
+                helper['sender'] != serv.username: #NOUVEAU
+            serv.privmsg(helper['target'], (u'Bonjour %s, quel est ton poney '\
+                                          +u'préféré ?') % helper['sender'])
+            self.users.append(helper['sender'])
+            self.bot.write_config(self, 'users', self.users)
             return True
 
     def get_stats(self, chan):

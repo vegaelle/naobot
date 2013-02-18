@@ -43,7 +43,7 @@ class ponies(stdPlugin):
         return False
 
     def on_action(self, serv, ev, helper):
-        return self.on_pubmsg(selv, ev, helper)
+        return self.on_pubmsg(ev, helper)
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s best : indique qui est le meilleur poney.

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import HTMLParser
 import twitter
 from stdPlugin import stdPlugin, PluginError
 
@@ -44,10 +45,6 @@ class microblogging(stdPlugin):
             return False
         elif command.startswith('?'):
             message = ' '.join(args)
-            if len(message) > self.status_length:
-                serv.privmsg(helper['target'], u'trop gros, passera '\
-                            +u'pas (%d caractères)' % len(message))
-                return True
             try:
                 id = self.send_status(message, command[1:])
                 serv.privmsg(helper['target'], u'c’est envoyé (%d) !' % id)
@@ -76,10 +73,6 @@ class microblogging(stdPlugin):
         else:
             args.insert(0, command)
             message = ' '.join(args)
-            if len(message) > self.status_length:
-                serv.privmsg(helper['target'], u'trop gros, passera '\
-                            +u'pas (%d caractères)' % len(message))
-                return True
             try:
                 id = self.send_status(message)
                 serv.privmsg(helper['target'], u'c’est envoyé (%d) !' % id)
@@ -96,7 +89,8 @@ class microblogging(stdPlugin):
         mentions = self.api.statuses.mentions_timeline(**params)
         self.last_fetch = mentions[0]['id']
         mentions.reverse()
+        h = HTMLParser.HTMLParser()
         for mention in mentions:
             serv.privmsg(helper['target'], u'@%s : %s (%d)' % \
-                    (mention['user']['screen_name'], mention['text'], mention['id']))
+                    (mention['user']['screen_name'], h.unescape(mention['text']), mention['id']))
         self.bot.write_config(self, 'last_fetch', self.last_fetch)

@@ -10,7 +10,7 @@ class ponies(stdPlugin):
 
     events = {'pubmsg': {'exclusive': False, 'command_namespace': 'ponies'},
               'action': {'exclusive': False},
-              'join': {'exclusive': False},
+              #'join': {'exclusive': False},
              }
 
 

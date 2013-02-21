@@ -23,7 +23,7 @@ class ponies(stdPlugin):
             self.exps = {}
             for pony in ponies_list:
                 self.ponies[pony[0]] = pony[1]
-                self.exps[pony[0]] = re.compile(r'\b%s\b' % pony[1], re.U | re.I)
+                self.exps[pony[0]] = re.compile(r'\b%s\b' % pony[0], re.U | re.I)
             chans = self.bot.conf['chans'] if not self.bot.channels else self.bot.channels
             self.stats = {}
             for chan in chans:

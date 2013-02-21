@@ -2,11 +2,11 @@
 
 import operator
 import os
+import re
 from stdPlugin import stdPlugin, PluginError
 
 class ponies(stdPlugin):
-    u'''Surveille la popularité de chaque personnage de My Little Pony:
-        Friendship Is Magic.'''
+    u'''Surveille la popularité de chaque personnage de My Little Pony: Friendship Is Magic.'''
 
     events = {'pubmsg': {'exclusive': False, 'command_namespace': 'ponies'},
               'action': {'exclusive': False},
@@ -20,8 +20,10 @@ class ponies(stdPlugin):
             file = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'ponies')).readlines()
             ponies_list = [tuple(line.replace('\n', '').split(':', 1)) for line in file]
             self.ponies = {}
+            self.exps = {}
             for pony in ponies_list:
                 self.ponies[pony[0]] = pony[1]
+                self.exps[pony[0]] = re.compile(r'\b%s\b' % pony[1], re.U | re.I)
             chans = self.bot.conf['chans'] if not self.bot.channels else self.bot.channels
             self.stats = {}
             for chan in chans:
@@ -34,7 +36,7 @@ class ponies(stdPlugin):
 
     def on_pubmsg(self, serv, ev, helper):
         for pony in self.ponies.keys():
-            if pony.lower() in helper['message'].lower():
+            if self.exps[pony].match(helper['message']):
                 try:
                     self.stats[helper['target']][pony] += 1
                 except KeyError:
@@ -47,14 +49,14 @@ class ponies(stdPlugin):
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s best : indique qui est le meilleur poney.
-        %(namespace)s stats : indique la liste des 3 meilelurs poneys.'''
+        %(namespace)s stats : indique la liste des 5 meilleurs poneys.'''
         if command == 'best':
                 best_pony = self.get_stats(helper['target'])[0]
                 serv.privmsg(helper['target'], u'%s is the best pony! %s' % \
                     (best_pony['name'], best_pony['url']))
                 return True
         elif command == 'stats':
-            stats = self.get_stats(helper['target'])[0:3]
+            stats = self.get_stats(helper['target'])[0:5]
             serv.privmsg(helper['target'], u'Ponies rating:')
             for pony in enumerate(stats):
                 serv.privmsg(helper['target'], u'    %d. %s: %d' % \

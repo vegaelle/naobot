@@ -10,7 +10,7 @@ class learn(stdPlugin):
               'privmsg': {'exclusive': False, 'command_namespace': 'say'},
               'action': {'exclusive': False},
               'join': {'exclusive': False},
-              'run': {'frequency': (300, 3000)},
+              'run': {'frequency': (300, 30000)},
              }
     markov = Markov()
 

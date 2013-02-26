@@ -49,7 +49,7 @@ class microblogging(stdPlugin):
                 id = self.send_status(message, command[1:])
                 serv.privmsg(helper['target'], u'c’est envoyé (%d) !' % id)
                 return True
-            except exception, e:
+            except Exception, e:
                 serv.privmsg(helper['target'], u'erreur lors de '\
                                                +u'l’envoi : %s' % e.message)
             except:
@@ -77,7 +77,7 @@ class microblogging(stdPlugin):
                 id = self.send_status(message)
                 serv.privmsg(helper['target'], u'c’est envoyé (%d) !' % id)
                 return True
-            except exception, e:
+            except Exception, e:
                 serv.privmsg(helper['target'], u'erreur lors de '\
                                                +u'l’envoi : %s' % e.message)
         return False

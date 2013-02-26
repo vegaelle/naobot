@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
+import subprocess
+import re
 from stdPlugin import stdPlugin
 
 class ping(stdPlugin):
@@ -11,21 +12,37 @@ class ping(stdPlugin):
     def __init__(self, bot, conf):
         return_val = super(ping, self).__init__(bot, conf)
         self.machines = conf['machines']
+        self.regex = re.compile('([0-9]{1,3})% packet loss')
         return return_val
 
     def ping(self, machine):
-        return os.system('ping %s' % machine)
+        ping = subprocess.Popen(['ping', '-c', '4', machine],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        out, error = ping.communicate()
+        match = self.regex.search(out)
+        if not match:
+            return None
+        else:
+            loss = match.group(1)
+            return int(loss)
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s : Vérifie le ping sur toutes les machines.'''
         try:
             pings = 0
             for machine in self.machines:
-                if self.ping(machine):
+                ping = self.ping(machine)
+                if ping == 0:
                     pings += 1
-                else:
+                elif ping is None or ping == 100:
                     serv.privmsg(helper['target'], u'%s ne répond pas !' % \
                                  machine)
+                else:
+                    import ipdb; ipdb.set_trace()
+                    serv.privmsg(helper['target'], u'%s répond avec %d%% de'\
+                                                   +'pertes' % (machine, ping))
+                    pings += 1
             serv.privmsg(helper['target'], u'%d machine%s sur %d répond%s'%\
                          (pings, ('s' if pings > 1 else ''),
                           len(self.machines), ('ent' if pings > 1 else '')))

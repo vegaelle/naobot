@@ -56,7 +56,7 @@ class Markov():
         if seed is None:
             seed = self.begin_word
         else:
-            seed = self.get_key_nocase(seed, self.dico[chan])
+            seed = self._get_key_nocase(seed, self.dico[chan])
             if seed is None:
                 return 'Je ne connais pas ce mot.'
         # Build the start of the sentence (backward from seed).

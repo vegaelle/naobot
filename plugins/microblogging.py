@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import re
+from datetime import datetime
 import HTMLParser
 import twitter
 from stdPlugin import stdPlugin, PluginError
@@ -19,6 +21,7 @@ class microblogging(stdPlugin):
         if not self.api.account.verify_credentials():
             raise PluginError('Invalid microblogging credentials!')
         self.last_fetch = self.bot.get_config(self, 'last_fetch', None)
+        self.parser = HTMLParser.HTMLParser()
 
     def send_status(self, message, reply=None):
         params = {'status': message}
@@ -34,6 +37,28 @@ class microblogging(stdPlugin):
     def del_status(self, id):
         result = self.api.statuses.destroy(id=id)
         return result['id']
+
+    def get_date(self, date):
+        dt = datetime.strptime(date, '%a %b %d %H:%M:%S +0000 %Y')
+        return dt.strftime('%d/%m/%y %H:%M:%S')
+
+    def on_pubmsg(self,serv, ev, helper):
+        ids = re.findall(r'https?://(?:www.)?twitter.com/#!/(?:[a-zA-Z0-9_]+)/status/([0-9]+)', helper['message'])
+        answered = False
+        if ids:
+            for id in ids:
+                try:
+                    status = self.api.statuses.show(id=id)
+                    serv.privmsg(helper['target'], u'[@%s] %s (%s)' %
+                                 (status['user']['screen_name'],
+                                  self.parser.unescape(status['text']),
+                                  self.get_date(status['created_at'])))
+                    answered = True
+                except Exception as e:
+                    serv.privmsg(helper['target'], u'Erreur de récupération')
+        if answered:
+            return True
+        return False
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s <message> : Publie un message de microblogging
@@ -89,8 +114,7 @@ class microblogging(stdPlugin):
         mentions = self.api.statuses.mentions_timeline(**params)
         self.last_fetch = mentions[0]['id']
         mentions.reverse()
-        h = HTMLParser.HTMLParser()
         for mention in mentions:
             serv.privmsg(helper['target'], u'@%s : %s (%d)' % \
-                    (mention['user']['screen_name'], h.unescape(mention['text']), mention['id']))
+                    (mention['user']['screen_name'], self.parser.unescape(mention['text']), mention['id']))
         self.bot.write_config(self, 'last_fetch', self.last_fetch)

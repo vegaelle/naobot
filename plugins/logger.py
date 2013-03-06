@@ -23,8 +23,7 @@ class logger(stdPlugin):
                 path = os.path.join(os.getcwd(), 'output', chan.replace('#', ''))
                 if not os.path.isdir(path):
                     os.makedirs(path)
-                self.combined_file[chan] = open(os.path.join(path,
-                                                'combined.log'), 'aw')
+                self.combined_file[chan] = os.path.join(path, 'combined.log')
         except Exception, e:
             pass
         return return_val
@@ -32,17 +31,19 @@ class logger(stdPlugin):
     def on_pubmsg(self, serv, ev, helper):
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         line = '[%s] <%s> %s\n' % (now, helper['sender'], helper['message'])
-        self.combined_file[helper['target']].write(line)
+        with open(self.combined_file[helper['target']], 'aw') as file:
+            self.combined_file[helper['target']].write(line)
         return False
 
     def on_action(self, serv, ev, helper):
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         line = '[%s] * %s %s\n' % (now, helper['sender'], helper['message'])
-        self.combined_file[helper['target']].write(line)
+        with open(self.combined_file[helper['target']], 'aw') as file:
+            self.combined_file[helper['target']].write(line)
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s : indique l’URL du log.'''
         serv.privmsg(helper['target'], u'Les logs sont disponibles sur %s.' % \
-                {'chan': self.url % helper['target'], 'log': 'combined.log'})
+                (self.url % {'chan': helper['target'], 'log': 'combined.log'}))
         return True
 

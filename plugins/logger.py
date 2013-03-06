@@ -44,6 +44,6 @@ class logger(stdPlugin):
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s : indique l’URL du log.'''
         serv.privmsg(helper['target'], u'Les logs sont disponibles sur %s.' % \
-                (self.url % {'chan': helper['target'], 'log': 'combined.log'}))
+                (self.url % {'chan': helper['target'].replace('#', ''), 'log': 'combined.log'}))
         return True
 

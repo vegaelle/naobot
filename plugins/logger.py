@@ -20,7 +20,7 @@ class logger(stdPlugin):
             chans = self.bot.conf['chans'] if not self.bot.channels else self.bot.channels
             self.combined_file = {}
             for chan in chans:
-                path = os.path.join(os.getcwd, 'output', chan.replace('#', ''))
+                path = os.path.join(os.getcwd(), 'output', chan.replace('#', ''))
                 if not os.path.isdir(path):
                     os.makedirs(path)
                 self.combined_file[chan] = open(os.path.join(path,
@@ -43,6 +43,6 @@ class logger(stdPlugin):
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s : indique l’URL du log.'''
         serv.privmsg(helper['target'], u'Les logs sont disponibles sur %s.' % \
-                     (self.url % helper['target'], 'combined.log'))
+                {'chan': self.url % helper['target'], 'log': 'combined.log'})
         return True
 

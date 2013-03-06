@@ -32,14 +32,14 @@ class logger(stdPlugin):
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         line = '[%s] <%s> %s\n' % (now, helper['sender'], helper['message'])
         with open(self.combined_file[helper['target']], 'aw') as file:
-            file.write(line)
+            file.write(line.encode('utf-8'))
         return False
 
     def on_action(self, serv, ev, helper):
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         line = '[%s] * %s %s\n' % (now, helper['sender'], helper['message'])
         with open(self.combined_file[helper['target']], 'aw') as file:
-            file.write(line)
+            file.write(line.encode('utf-8'))
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s : indique l’URL du log.'''

@@ -21,7 +21,7 @@ class logger(stdPlugin):
             self.combined_file = {}
             for chan in chans:
                 path = os.path.join(os.getcwd, 'output', chan.replace('#', ''))
-                if not os.path.isdir(path)
+                if not os.path.isdir(path):
                     os.makedirs(path)
                 self.combined_file[chan] = open(os.path.join(path,
                                                 'combined.log'), 'aw')

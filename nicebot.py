@@ -18,8 +18,9 @@ class Nicebot(bot.SingleServerIRCBot):
     registered_plugins = {}
     events = {}
 
-    def __init__(self, conf, plugins_conf):
+    def __init__(self, conf, plugins_conf, config_name):
         self.conf = conf
+        self.config_name = config_name
         bot.SingleServerIRCBot.__init__(self, self.conf['server'], self.conf['nick'], self.conf['fullname'])
         self.runs = {}
         for plugin_name in self.conf['plugins']:
@@ -245,7 +246,7 @@ class Nicebot(bot.SingleServerIRCBot):
 
     def get_config(self, plugin, name, default=None):
         try:
-            path = os.path.join('data', plugin.__class__.__name__)
+            path = os.path.join('data', self.config_name, plugin.__class__.__name__)
             try:
                 os.makedirs(path)
             except OSError:
@@ -258,7 +259,7 @@ class Nicebot(bot.SingleServerIRCBot):
 
     def write_config(self, plugin, name, data):
         try:
-            path = os.path.join('data', plugin.__class__.__name__)
+            path = os.path.join('data', self.config_name, plugin.__class__.__name__)
             try:
                 os.makedirs(path)
             except OSError:
@@ -298,4 +299,4 @@ if __name__ == '__main__':
 
     exec('from settings.%s import conf, plugins_conf' % results.config_file)
 
-    Nicebot(conf, plugins_conf).start()
+    Nicebot(conf, plugins_conf, results.config_file).start()

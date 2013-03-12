@@ -233,13 +233,13 @@ class Nicebot(bot.SingleServerIRCBot):
                 assert isinstance(self.events['run'], list)
                 for plugin_event in self.events['run']:
                     if datetime.datetime.now() >= self.runs[chan_name][plugin_event['plugin']]:
-                        self.registered_plugins[plugin_event['plugin']].on_run(serv, helper)
                         if isinstance(plugin_event['frequency'], tuple):
                             self.runs[chan_name][plugin_event['plugin']] += \
                                 datetime.timedelta(0, random.randint(*plugin_event['frequency']))
                         else:
                             self.runs[chan_name][plugin_event['plugin']] += \
                                 datetime.timedelta(0, plugin_event['frequency'])
+                        self.registered_plugins[plugin_event['plugin']].on_run(serv, helper)
 
             except Exception, e:
                 pass

@@ -14,6 +14,8 @@ class glou(stdPlugin):
             serv.action(helper['target'], u'sert une bière bien fraîche à %s.' %
                                           helper['sender'])
         else:
+            args.insert(0, command)
+            name = (' '.join(args))
             serv.action(helper['target'], u'sert une bière bien fraîche à %s.' %
-                                          command)
+                                          name)
         return True

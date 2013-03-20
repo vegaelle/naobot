@@ -148,7 +148,7 @@ class microblogging(stdPlugin):
             params['screen_name'] = fetch_type[5,]
         else:
             raise PluginError('Invalid fetch type: %s' % fetch_type)
-        if self.last_fetch[fetch_type]:
+        if fetch_type in self.last_fetch:
             params['since_id'] = self.last_fetch[fetch_type]
 
         statuses = getattr(self.api.statuses, method)(**params)

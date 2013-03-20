@@ -45,23 +45,32 @@ class ponies(stdPlugin):
         return False
 
     def on_action(self, serv, ev, helper):
-        return self.on_pubmsg(ev, helper)
+        return self.on_pubmsg(serv, ev, helper)
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s best : indique qui est le meilleur poney.
-        %(namespace)s stats : indique la liste des 5 meilleurs poneys.'''
+        %(namespace)s stats : indique la liste des 5 meilleurs poneys.
+        %(namespace)s score <pony> : indique le score du poney indiqué (sensible à la casse.'''
         if command == 'best':
                 best_pony = self.get_stats(helper['target'])[0]
-                serv.privmsg(helper['target'], u'%s is the best pony! %s' % \
+                serv.privmsg(helper['target'], u'%s est le meilleur poney ! %s' % \
                     (best_pony['name'], best_pony['url']))
                 return True
         elif command == 'stats':
             stats = self.get_stats(helper['target'])[0:5]
-            serv.privmsg(helper['target'], u'Ponies rating:')
+            serv.privmsg(helper['target'], u'Classement des poneys :')
             for pony in enumerate(stats):
                 serv.privmsg(helper['target'], u'    %d. %s: %d' % \
                     ((pony[0]+1), pony[1]['name'], pony[1]['score']))
             return True
+        elif command == 'score':
+            pony_name = ' '.join(args)
+            if pony_name not in self.ponies.keys():
+                serv.privmsg(helper['target'], u'Ce poney n’existe pas.')
+                return True
+            else:
+                serv.privmsg(helper['target'], u'%s : %s points' % (pony_name,
+                    self.stats[pony_name]))
         else:
             serv.privmsg(helper['target'], u'Je ne connais pas cette commande.')
             return True

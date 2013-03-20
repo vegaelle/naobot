@@ -11,7 +11,7 @@ class microblogging(stdPlugin):
     u'''Permet d’interagir avec un compte de microblogging (statusnet/twitter)'''
 
     events = {'pubmsg': {'exclusive': True, 'command_namespace': 'truite'},
-              'run': {'frequency': 60}}
+              'run': {'frequency': 300}}
 
     status_length = 140
 

@@ -11,16 +11,20 @@ class microblogging(stdPlugin):
     u'''Permet d’interagir avec un compte de microblogging (statusnet/twitter)'''
 
     events = {'pubmsg': {'exclusive': True, 'command_namespace': 'truite'},
-              'run': {'frequency': 300}}
+              'run': {'frequency': 60}}
 
     status_length = 140
 
     def __init__(self, bot, conf):
         return_val = super(microblogging, self).__init__(bot, conf)
-        self.api = twitter.Twitter(auth=twitter.OAuth(**conf))
+        self.api = twitter.Twitter(auth=twitter.OAuth(**conf['credentials']))
         if not self.api.account.verify_credentials():
             raise PluginError('Invalid microblogging credentials!')
-        self.last_fetch = self.bot.get_config(self, 'last_fetch', None)
+        # storing microblogging settings locally
+        self.settings = self.api.account.settings()
+        self.last_fetch = self.bot.get_config(self, 'last_fetch',
+                {'mentions':314279639914799104, 'home':314318744182734848,
+                    'self':314276010948452353})
         self.parser = HTMLParser.HTMLParser()
 
     def send_status(self, message, reply=None):
@@ -108,13 +112,57 @@ class microblogging(stdPlugin):
         return False
 
     def on_run(self, serv, helper):
-        params = {}
-        if self.last_fetch:
-            params['since_id'] = self.last_fetch
-        mentions = self.api.statuses.mentions_timeline(**params)
-        self.last_fetch = mentions[0]['id']
-        mentions.reverse()
-        for mention in mentions:
-            serv.privmsg(helper['target'], u'@%s : %s (%d)' % \
-                    (mention['user']['screen_name'], self.parser.unescape(mention['text']), mention['id']))
+        """ fetches specified timelines in settings. The conf dict may contain a
+        list of timeline types, like “mentions”, “home”, “self” or
+        “user:screen_name” where screen_name is an existing user.
+        """
+        #params = {}
+        #if self.last_fetch:
+        #    params['since_id'] = self.last_fetch
+        #mentions = self.api.statuses.mentions_timeline(**params)
+        #self.last_fetch = mentions[0]['id']
+        #mentions.reverse()
+        statuses = {}
+        print self.last_fetch
+        for fetch_type in self.conf['fetch']:
+            print 'Fetching %s (%s)' % (fetch_type, self.last_fetch[fetch_type])
+            statuses.update(self.fetch(fetch_type))
+        print 'Done'
+        for status_id in sorted(statuses.iterkeys()):
+            status = statuses[status_id]
+            serv.privmsg(helper['target'], u'[@%s] %s (%s) — %s' %
+                         (status['user']['screen_name'],
+                          self.parser.unescape(status['text']),
+                          self.get_date(status['created_at']),
+                          status['id']))
+            #serv.privmsg(helper['target'], u'@%s : %s (%d)' % \
+            #        (mention['user']['screen_name'], self.parser.unescape(mention['text']), mention['id']))
+        print 'Writing config'
         self.bot.write_config(self, 'last_fetch', self.last_fetch)
+
+    def fetch(self, fetch_type):
+        params = {}
+        if fetch_type in ['mentions', 'home']:
+            method = '%s_timeline' % fetch_type
+        elif fetch_type == 'retweets':
+            method = 'retweets_of_me'
+        elif fetch_type == 'self':
+            method = 'user_timeline'
+            params['screen_name'] = self.settings['screen_name']
+        elif fetch_type.startswith('user:'):
+            method = 'user_timeline'
+            params['screen_name'] = fetch_type[5,]
+        else:
+            raise PluginError('Invalid fetch type: %s' % fetch_type)
+        if self.last_fetch[fetch_type]:
+            params['since_id'] = self.last_fetch[fetch_type]
+
+        statuses = getattr(self.api.statuses, method)(**params)
+        status_dict = {}
+        if len(statuses) > 0:
+            self.last_fetch[fetch_type] = statuses[0]['id']
+            for status in statuses:
+                status_dict[int(status['id'])] = status
+        return status_dict
+
+

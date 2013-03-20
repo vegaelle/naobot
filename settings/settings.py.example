@@ -9,8 +9,10 @@ conf = {'server': [('irc.geeknode.org', 6667)],
         'plugins': ['admin', 'autopan', 'catcopter', 'discuss']}
 
 plugins_conf = {'admin': {'admins': ['Gordon']},
-                'microblogging': {'token': '',
-                                  'token_secret': '',
-                                  'consumer_key': '',
-                                  'consumer_secret': ''}
+                'microblogging': {'credentials': {'token': '',
+                                                  'token_secret': '',
+                                                  'consumer_key': '',
+                                                  'consumer_secret': ''},
+                                  'fetch': ['mentions'],
+                                 }
                 }

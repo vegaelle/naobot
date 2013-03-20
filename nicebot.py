@@ -35,8 +35,8 @@ class Nicebot(bot.SingleServerIRCBot):
               'grey': 14,
               'lightgrey': 15
               }
-    color_char = '\x03%d'
-    background_color_char = '%d,%d'
+    color_char = '\x03%s'
+    background_color_char = '%s,%s'
     bold_char = '\x02'
     reset_char = '\x15'
 

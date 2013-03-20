@@ -18,6 +18,28 @@ class Nicebot(bot.SingleServerIRCBot):
     registered_plugins = {}
     events = {}
 
+    colors = {'white': 0,
+              'black': 1,
+              'blue': 2,
+              'green': 3,
+              'red': 4,
+              'brown': 5,
+              'purple': 6,
+              'orange': 7,
+              'yellow': 8,
+              'lightgreen': 9,
+              'teal': 10,
+              'lightcyan': 11,
+              'lightblue': 12,
+              'pink': 13,
+              'grey': 14,
+              'lightgrey': 15
+              }
+    color_char = '\x03%d'
+    background_color_char = '%d,%d'
+    bold_char = '\x02'
+    reset_char = '\x15'
+
     def __init__(self, conf, plugins_conf, config_name):
         self.conf = conf
         self.config_name = config_name
@@ -96,7 +118,7 @@ class Nicebot(bot.SingleServerIRCBot):
                 for i in to_del:
                     del ev[i]
             return True
-        except IndexError as e:
+        except IndexError, e:
             print e
             return False
 
@@ -109,8 +131,8 @@ class Nicebot(bot.SingleServerIRCBot):
             except KeyError:
                 login_command = ('NickServ', 'identify %s')
             serv.privmsg(login_command[0], login_command[1] % self.conf['password'])
-        except KeyError:
-            pass
+        except KeyError, e:
+            print '%s: %s' % (e.__class__.__name__, e.message)
         for c in conf['chans']:
             serv.join(c)
 
@@ -138,7 +160,7 @@ class Nicebot(bot.SingleServerIRCBot):
                             answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
                             helper['message'] = message
                     except KeyError, e:
-                        pass
+                        print '%s: %s' % (e.__class__.__name__, e.message)
                 else:
                     if not plugin_event['exclusive'] or not answered:
                         try:
@@ -168,16 +190,16 @@ class Nicebot(bot.SingleServerIRCBot):
                             args = helper['message'].split(' ')
                             command = args.pop(0)
                             answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
-                    except KeyError:
-                        pass
+                    except KeyError, e:
+                        print '%s: %s' % (e.__class__.__name__, e.message)
                 else:
                     if not plugin_event['exclusive'] or not answered:
                         try:
                             answered = answered or self.registered_plugins[plugin_event['plugin']].on_privmsg(serv, ev, helper)
-                        except KeyError: # si on désactive le plugin, ça n’arrête pas la boucle
-                            pass
+                        except KeyError, e: # si on désactive le plugin, ça n’arrête pas la boucle
+                            print '%s: %s' % (e.__class__.__name__, e.message)
         except Exception, e:
-            pass
+            print '%s: %s' % (e.__class__.__name__, e.message)
 
     def on_action(self, serv, ev):
         helper = {'message': ev.arguments()[0],
@@ -192,7 +214,7 @@ class Nicebot(bot.SingleServerIRCBot):
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_action(serv, ev, helper)
         except Exception, e:
-            pass
+            print '%s: %s' % (e.__class__.__name__, e.message)
 
     def on_join(self, serv, ev):
         helper = {'chan': self.channels[ev.target()],
@@ -206,7 +228,7 @@ class Nicebot(bot.SingleServerIRCBot):
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_join(serv, ev, helper)
         except Exception, e:
-            pass
+            print '%s: %s' % (e.__class__.__name__, e.message)
 
     def on_kick(self, serv, ev):
         helper = {'victim': ev.arguments()[0],
@@ -222,7 +244,7 @@ class Nicebot(bot.SingleServerIRCBot):
                 if not plugin_event['exclusive'] or not answered:
                     answered = answered or self.registered_plugins[plugin_event['plugin']].on_kick(serv, ev, helper)
         except Exception, e:
-            pass
+            print '%s: %s' % (e.__class__.__name__, e.message)
 
     def on_run(self, serv, ev):
         for chan_name, chan in self.channels.items():
@@ -242,7 +264,7 @@ class Nicebot(bot.SingleServerIRCBot):
                         self.registered_plugins[plugin_event['plugin']].on_run(serv, helper)
 
             except Exception, e:
-                pass
+                print '%s: %s' % (e.__class__.__name__, e.message)
 
     def get_config(self, plugin, name, default=None):
         try:
@@ -269,6 +291,18 @@ class Nicebot(bot.SingleServerIRCBot):
                 return True
         except (OSError, IOError):
             return False
+
+    def bold(self, text):
+        return '%s%s%s' % (self.bold_char, text, self.bold_char)
+
+    def color(self, text, color, background=None):
+        if background:
+            color_str = self.color_char % (self.background_color_char %
+                                           (self.colors[color],
+                                            self.colors[background]))
+        else:
+            color_str = self.color_char % self.colors[color]
+        return '%s%s%s' % (color_str, text, self.reset_char)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Nicelab IRC bot', version='%(prog)s 0.5')

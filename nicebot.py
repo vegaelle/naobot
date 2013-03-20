@@ -143,27 +143,28 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.target()
                  }
         try:
-            assert isinstance(self.events['pubmsg'], list)
-            answered = False
-            for plugin_event in self.events['pubmsg']:
-                if 'command_prefix' in conf and helper['message'].startswith(conf['command_prefix']):
-                    if 'command_namespace' in plugin_event:
-                        command_call = conf['command_prefix']+plugin_event['command_namespace']
-                        if helper['message'].lower().startswith(command_call+' ') or helper['message'].lower() == command_call:
-                            # on appelle une commande
-                            cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
-                            message = helper['message']
-                            helper['message'] = helper['message'][cmd_len:]
-                            args = helper['message'].split(' ')
-                            command = args.pop(0)
-                            answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
-                            helper['message'] = message
-                else:
-                    if not plugin_event['exclusive'] or not answered:
-                        try:
-                            answered = answered or self.registered_plugins[plugin_event['plugin']].on_pubmsg(serv, ev, helper)
-                        except KeyError, e: # si on désactive le plugin, ça n’arrête pas la boucle
-                            print '%s: %s' % (e.__class__.__name__, e.message)
+            if 'pubmsg' in self.events:
+                assert isinstance(self.events['pubmsg'], list)
+                answered = False
+                for plugin_event in self.events['pubmsg']:
+                    if 'command_prefix' in conf and helper['message'].startswith(conf['command_prefix']):
+                        if 'command_namespace' in plugin_event:
+                            command_call = conf['command_prefix']+plugin_event['command_namespace']
+                            if helper['message'].lower().startswith(command_call+' ') or helper['message'].lower() == command_call:
+                                # on appelle une commande
+                                cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
+                                message = helper['message']
+                                helper['message'] = helper['message'][cmd_len:]
+                                args = helper['message'].split(' ')
+                                command = args.pop(0)
+                                answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
+                                helper['message'] = message
+                    else:
+                        if not plugin_event['exclusive'] or not answered:
+                            try:
+                                answered = answered or self.registered_plugins[plugin_event['plugin']].on_pubmsg(serv, ev, helper)
+                            except KeyError, e: # si on désactive le plugin, ça n’arrête pas la boucle
+                                print '%s: %s' % (e.__class__.__name__, e.message)
         except Exception, e:
             print '%s: %s' % (e.__class__.__name__, e.message)
 
@@ -173,25 +174,26 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.source().split('!')[0]
                  }
         try:
-            assert isinstance(self.events['privmsg'], list)
-            answered = False
-            for plugin_event in self.events['privmsg']:
-                if 'command_prefix' in conf and helper['message'].startswith(conf['command_prefix']):
-                    if 'command_namespace' in plugin_event:
-                        command_call = conf['command_prefix']+plugin_event['command_namespace']
-                        if helper['message'].lower().startswith(command_call+' ') or helper['message'].lower() == command_call:
-                            # on appelle une commande
-                            cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
-                            helper['message'] = helper['message'][cmd_len:]
-                            args = helper['message'].split(' ')
-                            command = args.pop(0)
-                            answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
-                else:
-                    if not plugin_event['exclusive'] or not answered:
-                        try:
-                            answered = answered or self.registered_plugins[plugin_event['plugin']].on_privmsg(serv, ev, helper)
-                        except KeyError, e: # si on désactive le plugin, ça n’arrête pas la boucle
-                            print '%s: %s' % (e.__class__.__name__, e.message)
+            if 'privmsg' in self.events:
+                assert isinstance(self.events['privmsg'], list)
+                answered = False
+                for plugin_event in self.events['privmsg']:
+                    if 'command_prefix' in conf and helper['message'].startswith(conf['command_prefix']):
+                        if 'command_namespace' in plugin_event:
+                            command_call = conf['command_prefix']+plugin_event['command_namespace']
+                            if helper['message'].lower().startswith(command_call+' ') or helper['message'].lower() == command_call:
+                                # on appelle une commande
+                                cmd_len = len(conf['command_prefix']+plugin_event['command_namespace']+' ')
+                                helper['message'] = helper['message'][cmd_len:]
+                                args = helper['message'].split(' ')
+                                command = args.pop(0)
+                                answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
+                    else:
+                        if not plugin_event['exclusive'] or not answered:
+                            try:
+                                answered = answered or self.registered_plugins[plugin_event['plugin']].on_privmsg(serv, ev, helper)
+                            except KeyError, e: # si on désactive le plugin, ça n’arrête pas la boucle
+                                print '%s: %s' % (e.__class__.__name__, e.message)
         except Exception, e:
             print '%s: %s' % (e.__class__.__name__, e.message)
 
@@ -202,11 +204,12 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.target()
                  }
         try:
-            assert isinstance(self.events['action'], list)
-            answered = False
-            for plugin_event in self.events['action']:
-                if not plugin_event['exclusive'] or not answered:
-                    answered = answered or self.registered_plugins[plugin_event['plugin']].on_action(serv, ev, helper)
+            if 'action' in self.events:
+                assert isinstance(self.events['action'], list)
+                answered = False
+                for plugin_event in self.events['action']:
+                    if not plugin_event['exclusive'] or not answered:
+                        answered = answered or self.registered_plugins[plugin_event['plugin']].on_action(serv, ev, helper)
         except Exception, e:
             print '%s: %s' % (e.__class__.__name__, e.message)
 
@@ -216,11 +219,12 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.target()
                  }
         try:
-            assert isinstance(self.events['join'], list)
-            answered = False
-            for plugin_event in self.events['join']:
-                if not plugin_event['exclusive'] or not answered:
-                    answered = answered or self.registered_plugins[plugin_event['plugin']].on_join(serv, ev, helper)
+            if 'join' in self.events:
+                assert isinstance(self.events['join'], list)
+                answered = False
+                for plugin_event in self.events['join']:
+                    if not plugin_event['exclusive'] or not answered:
+                        answered = answered or self.registered_plugins[plugin_event['plugin']].on_join(serv, ev, helper)
         except Exception, e:
             print '%s: %s' % (e.__class__.__name__, e.message)
 
@@ -232,11 +236,12 @@ class Nicebot(bot.SingleServerIRCBot):
                   'target': ev.target(),
                  }
         try:
-            assert isinstance(self.events['kick'], list)
-            answered = False
-            for plugin_event in self.events['kick']:
-                if not plugin_event['exclusive'] or not answered:
-                    answered = answered or self.registered_plugins[plugin_event['plugin']].on_kick(serv, ev, helper)
+            if 'kick' in self.events:
+                assert isinstance(self.events['kick'], list)
+                answered = False
+                for plugin_event in self.events['kick']:
+                    if not plugin_event['exclusive'] or not answered:
+                        answered = answered or self.registered_plugins[plugin_event['plugin']].on_kick(serv, ev, helper)
         except Exception, e:
             print '%s: %s' % (e.__class__.__name__, e.message)
 
@@ -246,16 +251,17 @@ class Nicebot(bot.SingleServerIRCBot):
                       'target': chan_name
                      }
             try:
-                assert isinstance(self.events['run'], list)
-                for plugin_event in self.events['run']:
-                    if datetime.datetime.now() >= self.runs[chan_name][plugin_event['plugin']]:
-                        if isinstance(plugin_event['frequency'], tuple):
-                            self.runs[chan_name][plugin_event['plugin']] += \
-                                datetime.timedelta(0, random.randint(*plugin_event['frequency']))
-                        else:
-                            self.runs[chan_name][plugin_event['plugin']] += \
-                                datetime.timedelta(0, plugin_event['frequency'])
-                        self.registered_plugins[plugin_event['plugin']].on_run(serv, helper)
+                if 'run' in self.events:
+                    assert isinstance(self.events['run'], list)
+                    for plugin_event in self.events['run']:
+                        if datetime.datetime.now() >= self.runs[chan_name][plugin_event['plugin']]:
+                            if isinstance(plugin_event['frequency'], tuple):
+                                self.runs[chan_name][plugin_event['plugin']] += \
+                                    datetime.timedelta(0, random.randint(*plugin_event['frequency']))
+                            else:
+                                self.runs[chan_name][plugin_event['plugin']] += \
+                                    datetime.timedelta(0, plugin_event['frequency'])
+                            self.registered_plugins[plugin_event['plugin']].on_run(serv, helper)
 
             except Exception, e:
                 print '%s: %s' % (e.__class__.__name__, e.message)

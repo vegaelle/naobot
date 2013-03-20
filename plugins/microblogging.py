@@ -22,9 +22,7 @@ class microblogging(stdPlugin):
             raise PluginError('Invalid microblogging credentials!')
         # storing microblogging settings locally
         self.settings = self.api.account.settings()
-        self.last_fetch = self.bot.get_config(self, 'last_fetch',
-                {'mentions':314279639914799104, 'home':314318744182734848,
-                    'self':314276010948452353})
+        self.last_fetch = self.bot.get_config(self, 'last_fetch', {})
         self.parser = HTMLParser.HTMLParser()
 
     def send_status(self, message, reply=None):
@@ -123,11 +121,8 @@ class microblogging(stdPlugin):
         #self.last_fetch = mentions[0]['id']
         #mentions.reverse()
         statuses = {}
-        print self.last_fetch
         for fetch_type in self.conf['fetch']:
-            print 'Fetching %s (%s)' % (fetch_type, self.last_fetch[fetch_type])
             statuses.update(self.fetch(fetch_type))
-        print 'Done'
         for status_id in sorted(statuses.iterkeys()):
             status = statuses[status_id]
             serv.privmsg(helper['target'], u'[@%s] %s (%s) — %s' %
@@ -137,7 +132,6 @@ class microblogging(stdPlugin):
                           status['id']))
             #serv.privmsg(helper['target'], u'@%s : %s (%d)' % \
             #        (mention['user']['screen_name'], self.parser.unescape(mention['text']), mention['id']))
-        print 'Writing config'
         self.bot.write_config(self, 'last_fetch', self.last_fetch)
 
     def fetch(self, fetch_type):

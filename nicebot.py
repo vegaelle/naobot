@@ -176,9 +176,8 @@ class Nicebot(bot.SingleServerIRCBot):
             assert isinstance(self.events['privmsg'], list)
             answered = False
             for plugin_event in self.events['privmsg']:
-                if helper['message'].startswith(conf['command_prefix']):
-                    try:
-                        plugin_event['command_namespace']
+                if 'command_prefix' in conf and helper['message'].startswith(conf['command_prefix']):
+                    if 'command_namespace' in plugin_event:
                         command_call = conf['command_prefix']+plugin_event['command_namespace']
                         if helper['message'].lower().startswith(command_call+' ') or helper['message'].lower() == command_call:
                             # on appelle une commande
@@ -187,8 +186,6 @@ class Nicebot(bot.SingleServerIRCBot):
                             args = helper['message'].split(' ')
                             command = args.pop(0)
                             answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
-                    except KeyError, e:
-                        print '%s: %s' % (e.__class__.__name__, e.message)
                 else:
                     if not plugin_event['exclusive'] or not answered:
                         try:

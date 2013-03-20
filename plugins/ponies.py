@@ -36,7 +36,7 @@ class ponies(stdPlugin):
 
     def on_pubmsg(self, serv, ev, helper):
         for pony in self.ponies.keys():
-            if self.exps[pony].match(helper['message']):
+            if self.exps[pony].search(helper['message']):
                 try:
                     self.stats[helper['target']][pony] += 1
                 except KeyError:
@@ -70,7 +70,7 @@ class ponies(stdPlugin):
                 return True
             else:
                 serv.privmsg(helper['target'], u'%s : %s points' % (pony_name,
-                    self.stats[pony_name]))
+                    self.stats[helper['target']][pony_name]))
         else:
             serv.privmsg(helper['target'], u'Je ne connais pas cette commande.')
             return True

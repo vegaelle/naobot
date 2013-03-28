@@ -8,6 +8,7 @@ class autopan(stdPlugin):
     events = {'pubmsg': {'exclusive': True}}
 
     targets = (
+            ('bitcoin', 'bitpan'),
             ('coin', 'pan'),
             ('nioc', 'nap'),
             ('\_o<', '\_x<'),

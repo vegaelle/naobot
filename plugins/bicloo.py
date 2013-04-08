@@ -7,7 +7,8 @@ import requests
 class bicloo(stdPlugin):
     u'''Informe sur l’état du réseau de vélos Bicloo de Nantes'''
 
-    events = {'pubmsg': {'exclusive': True, 'command_namespace': 'bicloo'}}
+    events = {'pubmsg': {'exclusive': True, 'command_namespace': 'bicloo'},
+              'privmsg': {'exclusive': True, 'command_namespace': 'bicloo'}}
 
     general_url = 'http://www.bicloo.nantesmetropole.fr/service/carto'
     station_url = 'http://www.bicloo.nantesmetropole.fr/service/stationdetails/nantes/%d'

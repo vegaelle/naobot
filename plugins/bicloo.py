@@ -44,13 +44,16 @@ class bicloo(stdPlugin):
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s <ID> : Indique le statut de la station <ID>
         %(namespace)s <nom> : Indique le statut de la station <nom>'''
-        if command.isdigit():
-            station_status = self.get_status(command)
-            serv.privmsg(helper['target'], station_status)
-        else:
-            args.insert(0, command)
-            station_name = ' '.join(args)
-            station_id = self.stations_ids[station_name.lower()]
-            station_status = self.get_status(station_id)
-            serv.privmsg(helper['target'], station_status)
+        try:
+            if command.isdigit():
+                station_status = self.get_status(command)
+                serv.privmsg(helper['target'], station_status)
+            else:
+                args.insert(0, command)
+                station_name = ' '.join(args)
+                station_id = self.stations_ids[station_name.lower()]
+                station_status = self.get_status(station_id)
+                serv.privmsg(helper['target'], station_status)
+        except:
+            serv.privmsg(helper['target'], 'Station inexistante')
         return True

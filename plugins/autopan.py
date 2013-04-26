@@ -7,7 +7,8 @@ from stdPlugin import stdPlugin
 class autopan(stdPlugin):
     u'''Réagit pragmatiquement aux invasions palmipèdes sur les canaux.'''
 
-    events = {'pubmsg': {'exclusive': True}}
+    events = {'pubmsg': {'exclusive': True},
+              'action': {'exclusive': True}}
 
     targets = (
         # Must not overlap
@@ -35,3 +36,6 @@ class autopan(stdPlugin):
         if len(output) > 0:
             serv.privmsg(helper['target'], ' '.join(output))
         return True
+
+    def on_action(self, serv, ev, helper):
+        return self.on_pubmsg(serv, ev, helper)

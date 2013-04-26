@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from random import random, choice
+from random import randint, choice
 from stdPlugin import stdPlugin
 
 class bulgroz(stdPlugin):
@@ -26,19 +26,19 @@ class bulgroz(stdPlugin):
             u"PRÉVOIR CARTE DE BANQUE POUR INSCRIVAGE EN CONNEXION DES "
             u"RENCONTRES!!"]
 
-    cadeau_messages = [u"OBTENEZ OFFRE DE MOINS CHER POUR %s EN CLIQUANT "
+    cadeau_messages = [u"OBTENEZ OFFRE DE MOINS CHER POUR %(produit)s EN CLIQUANT "
             u"LE PAYPAL",
-            u"%s SVP ?? ICI C'EST RÉDUCTIONS DES SOLDES SUR TOUTE LA "
-            u"SEMAINE POUR LE %s",
-            u"%s EXPÉDIÉ GRATUITEMENT SI COMMANDE DE LOT EN QUANTITÉ "
+            u"%(produit)s SVP ?? ICI C'EST RÉDUCTIONS DES SOLDES SUR TOUTE LA "
+            u"SEMAINE POUR LE %(produit)s",
+            u"%(produit)s EXPÉDIÉ GRATUITEMENT SI COMMANDE DE LOT EN QUANTITÉ "
             u"GRANDE POUR BEAUCOUP",
-            u"IL DÉSTOCKE %s SUR LA RÉGION DE VOTRE NRA OUVERT MÊME "
+            u"IL DÉSTOCKE %(produit)s SUR LA RÉGION DE VOTRE NRA OUVERT MÊME "
             u"DIMANCHE NUIT ET SHABBAT",
-            u"C'EST GRAND BESOIN DE %s ???? SANS ATTENTE DEMANDEZ LIVRAISON "
+            u"C'EST GRAND BESOIN DE %(produit)s ???? SANS ATTENTE DEMANDEZ LIVRAISON "
             u"POUR HIER ET RECEVEZ MAINTENANT!! TRÈS RAPIDE SI PAYPAL!!",
-            u"VOUS SAVEZ AVOIR BESOIN DE %s??? DONC CLIQUE VITE L'OFFRE SUR "
-            u"L'ÉCRAN ET REÇOIT %s CHEZ TOI DANS VOTRE MAISON!",
-            u"LA PROMOTION EST CHANCE DE VOUS POUR %s DU DISPONIBILITÉ "
+            u"VOUS SAVEZ AVOIR BESOIN DE %(produit)s??? DONC CLIQUE VITE L'OFFRE SUR "
+            u"L'ÉCRAN ET REÇOIT %(produit)s CHEZ TOI DANS VOTRE MAISON!",
+            u"LA PROMOTION EST CHANCE DE VOUS POUR %(produit)s DU DISPONIBILITÉ "
             u"INSTANTANÉE!!"]
 
     bortz_messages = [u"BORTZ RULEZ !",
@@ -60,7 +60,7 @@ class bulgroz(stdPlugin):
 
     def on_pubmsg(self, serv, ev, helper):
         message = helper['message']
-        long_words = re.findall(r"\b\w{8,}\b", message)
+        long_words = re.findall(r"\b\w{7,}\b", message)
 
         for word in self.single_answer:
             if re.search(r"\b%s\b" % re.escape(word), message, re.I):
@@ -74,6 +74,11 @@ class bulgroz(stdPlugin):
         if re.search(r"\bpaypal\b", message, re.I):
             serv.privmsg(helper['target'], choice(self.paypal_messages))
             return True
+
+        if (long_words !=[]):
+            if randint(1, 15) == 1:
+                serv.privmsg(helper['target'], choice(self.cadeau_messages) % {\
+                    "produit": choice(long_words).upper()})
 
         return False
 

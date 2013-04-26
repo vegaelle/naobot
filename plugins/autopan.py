@@ -23,7 +23,6 @@ class autopan(stdPlugin):
 
     def on_pubmsg(self, serv, ev, helper):
         words = re.findall(r"[\w'<>/\\]+", helper['message'], re.U)
-        print(words)
         output = []
         for w in words:
             tmp = w

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from stdPlugin import stdPlugin
 
 class autopan(stdPlugin):
@@ -8,7 +10,7 @@ class autopan(stdPlugin):
     events = {'pubmsg': {'exclusive': True}}
 
     targets = (
-            ('bitcoin', 'bitpan'),
+        # Must not overlap
             ('coin', 'pan'),
             ('nioc', 'nap'),
             ('\_o<', '\_x<'),
@@ -20,14 +22,17 @@ class autopan(stdPlugin):
         )
 
     def on_pubmsg(self, serv, ev, helper):
-        pans = []
-        for coin, pan in self.targets:
-            for _ in xrange(helper['message'].lower().count(coin)):
-                pans.append(pan)
-        if pans:
-            if len(pans) < 3:
-                serv.privmsg(helper['target'], ' '.join(pans))
-                return True
-            else:
-                serv.privmsg(helper['target'], 'raaa' + 'ta' * len(pans))
-                return True
+        words = re.findall(r"[\w'<>/\\]+", helper['message'], re.U)
+        print(words)
+        output = []
+        for w in words:
+            tmp = w
+            for coin, pan in self.targets:
+                tmp = tmp.replace(coin, pan)
+            # If the word has been modified
+            if tmp != w:
+                output.append(tmp)
+        # Print all those words
+        if len(output) > 0:
+            serv.privmsg(helper['target'], ' '.join(output))
+        return True

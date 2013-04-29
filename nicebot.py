@@ -147,9 +147,9 @@ class Nicebot(bot.SingleServerIRCBot):
                 assert isinstance(self.events['pubmsg'], list)
                 answered = False
                 for plugin_event in self.events['pubmsg']:
-                    print '[%s] Calling plugin %s' %\
-                    (datetime.datetime.now().strftime('%H:%M:%S'),
-                            plugin_event['plugin']),
+                    #print '[%s] Calling plugin %s' %\
+                    #(datetime.datetime.now().strftime('%H:%M:%S'),
+                    #        plugin_event['plugin']),
                     if 'command_prefix' in conf and helper['message'].startswith(conf['command_prefix']):
                         if 'command_namespace' in plugin_event:
                             command_call = conf['command_prefix']+plugin_event['command_namespace']
@@ -161,13 +161,13 @@ class Nicebot(bot.SingleServerIRCBot):
                                 args = helper['message'].split(' ')
                                 command = args.pop(0)
                                 answered = self.registered_plugins[plugin_event['plugin']].on_cmd(serv, ev, command, args, helper)
-                                print '%s' % answered
+                                #print '%s' % answered
                                 helper['message'] = message
                     else:
                         if not plugin_event['exclusive'] or not answered:
                             try:
                                 answered = answered or self.registered_plugins[plugin_event['plugin']].on_pubmsg(serv, ev, helper)
-                                print '%s' % answered
+                                #print '%s' % answered
                             except KeyError, e: # si on désactive le plugin, ça n’arrête pas la boucle
                                 print '%s: %s' % (e.__class__.__name__, e.message)
         except Exception, e:

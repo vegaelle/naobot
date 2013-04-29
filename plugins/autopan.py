@@ -35,7 +35,8 @@ class autopan(stdPlugin):
         # Print all those words
         if len(output) > 0:
             serv.privmsg(helper['target'], ' '.join(output))
-        return True
+            return True
+        return False
 
     def on_action(self, serv, ev, helper):
         return self.on_pubmsg(serv, ev, helper)

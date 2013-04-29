@@ -26,7 +26,7 @@ class discuss(stdPlugin):
                 self.say(serv, helper['target'], sentence % vars)
                 return True
         except KeyError:
-            pass
+            return False
 
     def on_pubmsg(self, serv, ev, helper):
         if helper['message'].lower().find(serv.username.lower()) >= 0:

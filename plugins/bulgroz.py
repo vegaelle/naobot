@@ -79,6 +79,7 @@ class bulgroz(stdPlugin):
             if randint(1, 15) == 1:
                 serv.privmsg(helper['target'], choice(self.cadeau_messages) % {\
                     "produit": choice(long_words).upper()})
+                return True
 
         return False
 

@@ -37,7 +37,7 @@ class autopan(stdPlugin):
         for w in words:
             tmp = w
             for coin, pan in self.targets:
-                tmp = case_insensitive_replace(tmp, coin, pan)
+                tmp = case_sensitive_replace(tmp, coin, pan)
             # If the word has been modified
             if tmp != w:
                 output.append(tmp)

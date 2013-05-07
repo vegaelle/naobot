@@ -129,8 +129,7 @@ class karma(stdPlugin):
             serv.privmsg(chan, u'Need a word.')
 
     def load_karmadb(self, chan):
-        self.karma[chan] = dict()
-        # TODO: Save and load from disk
+        self.karma[chan] = self.bot.get_config(self, chan, dict())
 
     def save_karmadb(self, chan):
-        pass
+        return self.bot.write_config(self, chan, self.karma[chan])

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import random
 
 from stdPlugin import stdPlugin
 
@@ -78,18 +79,26 @@ class karma(stdPlugin):
             self.save_karmadb(chan)
 
     def match_words(self, serv, chan, message):
-        """Try to match a word known in the karma database, and react accordingly."""
-        answered = False
+        """Try to match a word known in the karma database, and react
+        accordingly.  To (somewhat) avoid spam, we only react to one
+        word in the message, the one with the greatest absolute
+        karma."""
         words = [w.strip(self.punctuation) for w in message.split()]
-        for w in words:
-            k = self.get_karma(chan, w)
-            if k > 0:
-                serv.privmsg(chan, u"Yeah, j'adore %s \o/" % w)
-                answered = True
-            if k < 0:
-                serv.privmsg(chan, u"C'est nul, %s" % w)
-                answered = True
-        return answered
+        if not words:
+            return False
+        candidates = [(w, self.get_karma(chan, w)) for w in words]
+        # Sort by decreasing absolute karma
+        candidates.sort(key=(lambda (word, karma) : -abs(karma)))
+        # Select all words with the greatest absolute karma
+        (_, karma) = candidates[0]
+        chosen_words = [(w, k) for (w, k) in candidates if abs(k) == abs(karma)]
+        random.shuffle(chosen_words)
+        (chosen_word, karma) = chosen_words[0]
+        if karma > 0:
+            serv.privmsg(chan, u"Yeah, j'adore %s \o/" % chosen_word)
+        if karma < 0:
+            serv.privmsg(chan, u"C'est nul, %s" % chosen_word)
+        return True
 
     def on_pubmsg(self, serv, ev, helper):
         self.parse_karma(helper['target'], helper['message'])

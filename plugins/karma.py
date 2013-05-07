@@ -16,6 +16,9 @@ class karma(stdPlugin):
     regexp_pos = re.compile(r"(([\w\_'/]-?)+)\+\+", re.U)
     regexp_neg = re.compile(r"(([\w\_'/]-?)+)--", re.U)
 
+    # Discard small words
+    min_word_size = 3
+
     punctuation = u",.  !?"
     
     # chan -> (word -> karma)
@@ -38,7 +41,7 @@ class karma(stdPlugin):
         # In the regexp, we must use a second pair of parentheses to
         # group things, which causes re.findall() to output a list of
         # couples. Quick fix.
-        return [x[0] for x in r.findall(message)]
+        return [x[0] for x in r.findall(message) if len(x[0]) >= self.min_word_size]
 
     def get_karma(self, chan, word):
         word = word.lower()

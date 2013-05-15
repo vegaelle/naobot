@@ -5,6 +5,14 @@ import random
 
 from stdPlugin import stdPlugin
 
+# Universal quantifier on a sequence.
+def forall(sequence, predicate):
+    return reduce(lambda x, y: x and y, map(predicate, sequence), True)
+
+# Existential quantifier on a sequence.
+def exists(list, property):
+    return reduce(lambda x, y: x or y, map(predicate, sequence), False)
+
 class karma(stdPlugin):
     u'''Chaque terme suivi de '++' ou '--' se voit attribuer un karma en conséquence. Par exemple, « fromage++ ».'''
 
@@ -32,6 +40,46 @@ class karma(stdPlugin):
         for chan in chans:
             self.load_karmadb(chan)
         return return_val
+
+    def react_karma_pos(self, k):
+        """Returns an appropriate sentence for the given (positive) karma."""
+        # If we were using python3, we could do stuff like "42 in
+        # range(10, 1000000000)", which runs in O(1). But not with
+        # python2 :(
+        if k <= 2:
+            return u"Intéressant, %s."
+        if k <= 4:
+            return u"C'est cool %s !"
+        if k <= 8:
+            return u"Yeah, j'adore %s \o/"
+        if k <= 16:
+            return u"/me trouve que %s est absolument génial ♥"
+        if k <= 32:
+            return u"Waou, je n'ai jamais vu quelque chose d'aussi monstrueusement génial que %s !"
+        if k <= 64:
+            return u"/me se pâme d'admiration devant %s"
+        if k <= 128:
+            return u"Que dire de plus quand on a %s ?"
+        return u"/me se suicide de bonheur à cause de %s"
+
+    def react_karma_neg(self, k):
+        """Same function for negative karma."""
+        k = abs(k)
+        if k <= 2:
+            return u"Pas génial, %s."
+        if k <= 4:
+            return u"Mouais, %s, c'est carrément bof."
+        if k <= 8:
+            return u"C'est nul, %s."
+        if k <= 16:
+            return u"Beuh, c'est carrément naze, %s :("
+        if k <= 32:
+            return u"Qui a eu l'idée d'inventer %s ? C'est vraiment un abruti."
+        if k <= 64:
+            return u"/me vomit sur %s"
+        if k <= 128:
+            return u"Chuck Norris a cherché pire que %s. Il est revenu en pleurant."
+        return u"/me préfère se suicider plutôt que de parler de %s"
 
     def find_all_karma(self, message, plus):
         """Returns the list of words that were used """
@@ -84,9 +132,9 @@ class karma(stdPlugin):
         word in the message, the one with the greatest absolute
         karma."""
         words = [w.strip(self.punctuation) for w in message.split()]
-        if not words:
-            return False
         candidates = [(w, self.get_karma(chan, w)) for w in words]
+        if not words or forall(candidates, lambda (w, k) : k == 0):
+            return False
         # Sort by decreasing absolute karma
         candidates.sort(key=(lambda (word, karma) : -abs(karma)))
         # Select all words with the greatest absolute karma
@@ -95,9 +143,13 @@ class karma(stdPlugin):
         random.shuffle(chosen_words)
         (chosen_word, karma) = chosen_words[0]
         if karma > 0:
-            serv.privmsg(chan, u"Yeah, j'adore %s \o/" % chosen_word)
+            answer = self.react_karma_pos(karma) % chosen_word
         if karma < 0:
-            serv.privmsg(chan, u"C'est nul, %s" % chosen_word)
+            answer = self.react_karma_neg(karma) % chosen_word
+        if answer.startswith(u"/me "):
+            serv.action(chan, answer[4:])
+        else:
+            serv.privmsg(chan, answer)
         return True
 
     def on_pubmsg(self, serv, ev, helper):

@@ -35,7 +35,7 @@ class discuss(stdPlugin):
                     'chan': helper['target'],
                     }
             if helper['message'].lower().find('ping') >= 0:
-                return u'%(nick): pong' % vars
+                self.say(serv, helper['target'], u'%(nick)s: pong' % vars)
             else:
                 return self.random_sentence(serv, ev, helper, 'mention', vars)
         else:

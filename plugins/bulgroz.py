@@ -56,6 +56,8 @@ class bulgroz(stdPlugin):
             u"FAMILLE (MÊME HOMO)",
             u"pédo": pedo,
             u"pedo": pedo,
+            u"bite": u"BEAUCOUP DES TAS DE MÂ©GABITES PAR MINUTES ? CLIQUEZ ICI"
+                    +u" POUR LA FIBRE À CHIBRES."
     }
 
     def on_pubmsg(self, serv, ev, helper):

@@ -18,7 +18,6 @@ class nsa(stdPlugin):
             self.words = file.replace('\n', ' ').split(', ')
         except Exception, e:
             raise PluginError('No words found: %s.' % e)
-        import ipdb; ipdb.set_trace()
         return return_val
 
     def gen_sentence(self):

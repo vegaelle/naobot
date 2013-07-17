@@ -205,9 +205,11 @@ class Nicebot(bot.SingleServerIRCBot):
     def on_action(self, serv, ev):
         helper = {'message': ev.arguments()[0],
                   'sender': ev.source().split('!')[0],
-                  'chan': self.channels[ev.target()],
+                  #'chan': self.channels[ev.target()],
                   'target': ev.target()
                  }
+        if ev.target() in self.channels:
+            helper['chan'] = self.channels[ev.target()]
         try:
             if 'action' in self.events:
                 assert isinstance(self.events['action'], list)

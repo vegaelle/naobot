@@ -8,7 +8,7 @@ class nsa(stdPlugin):
     u'''Attire l’attention de la National Security Agency sur le chan.'''
 
     events = {
-            'run': {'frequency': (300, 3000)},
+            'run': {'frequency': (1200, 12000)},
         }
 
     def __init__(self, bot, conf):

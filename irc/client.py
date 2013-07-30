@@ -942,8 +942,15 @@ class ServerConnection(Connection):
 
     def privmsg(self, target, text):
         """Send a PRIVMSG command, splitted if necessary."""
-        if '\n' in text and self.fix_mode:
-            for line in text.split('\n'):
+        text = text.strip('\x01')
+
+        if any([item in text for item in ['\n','\r']]) and self.fix_mode:
+            lines = text.replace('\r','\n').split('\n')
+            if len(lines) > 5:
+                concat_lines = ' '.join(lines[5:])
+                lines = lines[:5]
+                lines.append(concat_lines)
+            for line in lines:
                 self.privmsg(target, line)
         else:
             bytes = ('PRIVMSG %s :%s' % (target, text)).encode('utf-8') +\

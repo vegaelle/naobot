@@ -45,7 +45,7 @@ class microblogging(stdPlugin):
         return dt.strftime('%d/%m/%y %H:%M:%S')
 
     def on_pubmsg(self,serv, ev, helper):
-        ids = re.findall(r'https?://(?:www.)?twitter.com/(?:#!/)?(?:[a-zA-Z0-9_]+)/status(es)?/([0-9]+)', helper['message'])
+        ids = re.findall(r'https?://(?:www.)?twitter.com/(?:#!/)?(?:[a-zA-Z0-9_]+)/status(?:es)?/([0-9]+)', helper['message'])
         answered = False
         if ids:
             for id in ids:

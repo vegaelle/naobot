@@ -14,5 +14,6 @@ plugins_conf = {'admin': {'admins': ['Gordon']},
                                                   'consumer_key': '',
                                                   'consumer_secret': ''},
                                   'fetch': ['mentions'],
+                                  'mode': 'r'
                                  }
                 }

@@ -68,6 +68,10 @@ class microblogging(stdPlugin):
         %(namespace)s +<ID> : Répète le message donné
         %(namespace)s !<ID> : Supprime le message donné (réservé aux admins)
         '''
+        if self.conf['mode'] != 'rw':
+            serv.privms(helper['target'], u'Accès en lecture seule uniquement.')
+            return True
+
         if not command:
             return False
         elif command.startswith('?'):

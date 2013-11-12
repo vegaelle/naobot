@@ -275,7 +275,7 @@ class Nicebot(bot.SingleServerIRCBot):
 
     def get_config(self, plugin, name, default=None):
         try:
-            path = os.path.join('data', self.config_name, plugin.__class__.__name__)
+            path = os.path.join(os.path.dirname(sys.argv[0]), 'data', self.config_name, plugin.__class__.__name__)
             try:
                 os.makedirs(path)
             except OSError:
@@ -288,7 +288,7 @@ class Nicebot(bot.SingleServerIRCBot):
 
     def write_config(self, plugin, name, data):
         try:
-            path = os.path.join('data', self.config_name, plugin.__class__.__name__)
+            path = os.path.join(os.path.dirname(sys.argv[0]), 'data', self.config_name, plugin.__class__.__name__)
             try:
                 os.makedirs(path)
             except OSError:

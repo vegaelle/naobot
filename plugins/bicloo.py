@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from stdPlugin import stdPlugin
+from stdPlugin import stdPlugin, PluginError
 from xml.etree import ElementTree
 import requests
 

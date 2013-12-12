@@ -814,7 +814,7 @@ class ServerConnection(Connection):
     def ctcp(self, ctcptype, target, parameter=""):
         """Send a CTCP command."""
         ctcptype = ctcptype.upper()
-        self.privmsg(target, "\001%s%s\001" % (ctcptype, parameter and (" " + parameter) or ""))
+        self.privmsg(target, "\001%s%s\001" % (ctcptype, parameter and (" " + parameter) or ""), raw=True)
 
     def ctcp_reply(self, target, parameter):
         """Send a CTCP REPLY command."""
@@ -940,9 +940,11 @@ class ServerConnection(Connection):
         """Send a PONG command."""
         self.send_raw("PONG %s%s" % (target, target2 and (" " + target2)))
 
-    def privmsg(self, target, text):
-        """Send a PRIVMSG command, splitted if necessary."""
-        text = text.strip('\x01')
+    def privmsg(self, target, text, raw=False):
+        """Send a PRIVMSG command, splitted if necessary. The raw param prevents
+        the \x01 chars to be stripped if set to True."""
+        if not raw:
+            text = text.strip('\x01')
 
         if any([item in text for item in ['\n','\r']]) and self.fix_mode:
             lines = text.replace('\r','\n').split('\n')
@@ -951,7 +953,7 @@ class ServerConnection(Connection):
                 lines = lines[:5]
                 lines.append(concat_lines)
             for line in lines:
-                self.privmsg(target, line)
+                self.privmsg(target, line, raw=raw)
         else:
             bytes = ('PRIVMSG %s :%s' % (target, text)).encode('utf-8') +\
                     b'\r\n'

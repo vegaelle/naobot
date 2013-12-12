@@ -1,4 +1,11 @@
-settings.py
-*.swp
-*.pyc
+# Variable settings
 data
+settings/settings.py
+
+# Python byte-compiled files
+*.pyc
+
+# Temporary files
+*~
+*.swp
+*.swo

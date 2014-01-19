@@ -13,7 +13,7 @@ from plugins.stdPlugin import PluginError
 
 #from settings import conf, plugins_conf
 
-class Nicebot(bot.SingleServerIRCBot):
+class Naobot(bot.SingleServerIRCBot):
 
     registered_plugins = {}
     events = {}
@@ -340,4 +340,4 @@ if __name__ == '__main__':
 
     exec('from settings.%s import conf, plugins_conf' % results.config_file)
 
-    Nicebot(conf, plugins_conf, results.config_file).start()
+    Naobot(conf, plugins_conf, results.config_file).start()

@@ -78,4 +78,4 @@ class learn(stdPlugin):
         return self.bot.write_config(self, chan, data)
 
     def on_run(self, serv, helper):
-        serv.privmsg(helper['target'], self.get_sentence(helper['target']))
+        serv.privmsg(helper['target'], self.markov.get_sentence(helper['target']))

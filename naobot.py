@@ -344,7 +344,6 @@ if __name__ == '__main__':
 
     try:
         exec('from settings.%s import conf, plugins_conf' % results.config_file)
-        raise Exception('bla')
 
         Naobot(conf, plugins_conf, results.config_file).start()
     except Exception, e:

@@ -6,7 +6,9 @@ conf = {'server': [('irc.geeknode.org', 6667)],
         'fullname': 'Le bot IRC du Nicelab',
         'chans': ['#poney-gonflable'],
         'command_prefix': '~',
-        'plugins': ['admin', 'autopan', 'catcopter', 'discuss']}
+        'plugins': ['admin', 'autopan', 'catcopter', 'discuss'],
+        'admin_mail': 'your@email'}
+
 
 plugins_conf = {'admin': {'admins': ['Gordon']},
                 'microblogging': {'credentials': {'token': '',

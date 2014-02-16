@@ -8,6 +8,10 @@ import re
 import pickle
 import datetime
 import random
+import traceback
+#import smtplib
+from subprocess import Popen, PIPE
+from email.mime.text import MIMEText
 from irc import bot
 from plugins.stdPlugin import PluginError
 
@@ -338,6 +342,29 @@ if __name__ == '__main__':
         else:
             os._exit(0)
 
-    exec('from settings.%s import conf, plugins_conf' % results.config_file)
+    try:
+        exec('from settings.%s import conf, plugins_conf' % results.config_file)
+        raise Exception('bla')
 
-    Naobot(conf, plugins_conf, results.config_file).start()
+        Naobot(conf, plugins_conf, results.config_file).start()
+    except Exception, e:
+        # sending mail backtrace
+        now = datetime.datetime.now()
+        mail_subject = 'Fatal exception on Naobot %s!' % results.config_file
+        mail_content = '[%s] %s\n\n' % (str(now), e.message)
+        mail_content += traceback.format_exc()
+        msg = MIMEText(mail_content)
+        msg['Subject'] = mail_subject
+        msg['From'] = 'Naobot <naobot@localhost>'
+        msg['To'] = conf['admin_mail']
+        
+        #s = smtplib.SMTP('localhost')
+        #s.sendmail(msg['From'], [conf['admin_mail']], msg.as_string())
+        #s.quit()
+
+        p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
+        p.communicate(msg.as_string())
+
+
+
+

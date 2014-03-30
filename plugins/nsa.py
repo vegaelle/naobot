@@ -4,17 +4,17 @@ import random
 import os
 from stdPlugin import stdPlugin, PluginError
 
+
 class nsa(stdPlugin):
     u'''Attire l’attention de la National Security Agency sur le chan.'''
 
-    events = {
-            'run': {'frequency': (1200, 12000)},
-        }
+    events = {'run': {'frequency': (1200, 12000)}}
 
     def __init__(self, bot, conf):
         return_val = super(nsa, self).__init__(bot, conf)
         try:
-            file = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'nsa')).read()
+            file = open(os.path.join(os.path.dirname(
+                os.path.realpath(__file__)), 'nsa')).read()
             self.words = file.replace('\n', ' ').split(', ')
         except Exception, e:
             raise PluginError('No words found: %s.' % e)
@@ -28,6 +28,3 @@ class nsa(stdPlugin):
 
     def on_run(self, serv, helper):
         serv.privmsg(helper['target'], self.gen_sentence())
-
-
-

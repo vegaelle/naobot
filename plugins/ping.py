@@ -4,6 +4,7 @@ import subprocess
 import re
 from stdPlugin import stdPlugin
 
+
 class ping(stdPlugin):
     u'''Permet de vérifier si plusieurs machines répondent au ping'''
 
@@ -36,17 +37,15 @@ class ping(stdPlugin):
                 if ping == 0:
                     pings += 1
                 elif ping is None or ping == 100:
-                    serv.privmsg(helper['target'], u'%s ne répond pas !' % \
+                    serv.privmsg(helper['target'], u'%s ne répond pas !' %
                                  machine)
                 else:
-                    import ipdb; ipdb.set_trace()
-                    serv.privmsg(helper['target'], u'%s répond avec %d%% de'\
-                                                   +'pertes' % (machine, ping))
+                    serv.privmsg(helper['target'], u'%s répond avec %d%% de'
+                                 + 'pertes' % (machine, ping))
                     pings += 1
-            serv.privmsg(helper['target'], u'%d machine%s sur %d répond%s'%\
+            serv.privmsg(helper['target'], u'%d machine%s sur %d répond%s' %
                          (pings, ('s' if pings > 1 else ''),
                           len(self.machines), ('ent' if pings > 1 else '')))
         except Exception, e:
             serv.privmsg(helper['target'], u'Fail : %s.' % e.message)
         return False
-

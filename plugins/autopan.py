@@ -5,13 +5,16 @@ import re
 from stdPlugin import stdPlugin
 
 # From http://stackoverflow.com/a/3009124
+
+
 def case_sensitive_replace(s, before, after):
     """Replaces 'before' by 'after' in 's'. Matching is case-insensitive,
     but the replaced string keeps the original case of the matched
     part. Note that 'after' MUST be shorter than 'before'."""
     regex = re.compile(re.escape(before), re.I | re.U)
     return regex.sub(lambda x: ''.join(d.upper() if c.isupper() else d.lower()
-                                       for c,d in zip(x.group(), after)), s)
+                                       for c, d in zip(x.group(), after)), s)
+
 
 class autopan(stdPlugin):
     u'''Réagit pragmatiquement aux invasions palmipèdes sur les canaux.'''
@@ -21,14 +24,14 @@ class autopan(stdPlugin):
 
     targets = (
         # Must not overlap
-            ('coin', 'pan'),
-            ('nioc', 'nap'),
-            ('\_o<', '\_x<'),
-            ('>o_/', '>x_/'),
-            (u'ᴎIOↃ', u'ᴎAP'),
-            ('koin', 'pang'),
-            ('c01n', 'p4n'),
-            ('n10c', 'n4p'),
+        ('coin', 'pan'),
+        ('nioc', 'nap'),
+        ('\_o<', '\_x<'),
+        ('>o_/', '>x_/'),
+        (u'ᴎIOↃ', u'ᴎAP'),
+        ('koin', 'pang'),
+        ('c01n', 'p4n'),
+        ('n10c', 'n4p'),
         )
 
     def on_pubmsg(self, serv, ev, helper):

@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import random
-from datetime import datetime
 import re
 from stdPlugin import stdPlugin
+
 
 class discuss(stdPlugin):
     u'''Tente d’engager la conversation sur un canal.'''
 
-    events = {
-            'pubmsg': {'exclusive': True},
-            'privmsg': {'exclusive': True},
-            'action': {'exclusive': True},
-            'join': {'exclusive': True},
-            'kick': {'exclusive': True},
-        }
+    events = {'pubmsg': {'exclusive': True},
+              'privmsg': {'exclusive': True},
+              'action': {'exclusive': True},
+              'join': {'exclusive': True},
+              'kick': {'exclusive': True},
+              }
 
     def random_sentence(self, serv, ev, helper, type, vars):
         try:
@@ -46,7 +45,7 @@ class discuss(stdPlugin):
         return self.on_pubmsg(serv, ev, helper)
 
     def on_join(self, serv, ev, helper):
-        if helper['sender'] == serv.username: #s’il s’agit de notre propre join
+        if helper['sender'] == serv.username:  # si c’est notre propre join
             vars = {'chan': helper['target'],
                     }
             return self.random_sentence(serv, ev, helper, 'joining', vars)
@@ -72,23 +71,25 @@ class discuss(stdPlugin):
         return True
 
     def on_cmd(self, serv, ev, command, args, helper):
-        serv.privmsg(helper['target'], 'Je ne connais pas la commande %s' % command)
+        serv.privmsg(helper['target'], 'Je ne connais pas la commande %s' %
+                     command)
         return True
 
     def __init__(self, bot, conf):
         # déclaration des différentes phrases
         self.sentences = {'mention': [u'/me mange %(nick)s',
-                                 u'Hein ?',
-                                 self.answer_message,
-                                 u'Ho, ta gueule %(nick)s',
-                                 ],
+                                      u'Hein ?',
+                                      self.answer_message,
+                                      u'Ho, ta gueule %(nick)s',
+                                      ],
                           'joining': [u'Coucou, tu veux voir mon bit ?',
                                       u'Ohai %(chan)s o/',
                                       u'Faites comme si j’étais pas là.',
                                       u'De toutes façons, il meurt à la fin.',
                                       ],
                           'kick': [u'Bon débarras.',
-                                   u'J’en avais marre de %(victim)s de toutes façons',
+                                   u'J’en avais marre de %(victim)s de toutes '
+                                   u'façons',
                                    u'Haha.',
                                    ],
                           }

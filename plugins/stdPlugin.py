@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import re
 
 class PluginError(Exception):
     pass
 
+
 class stdPlugin(object):
     u'''Permet de créer des plugins.'''
 
-    #events = {'pubmsg': {'exclusive': True, 'command_namespace': 'say'}}
+    # events = {'pubmsg': {'exclusive': True, 'command_namespace': 'say'}}
     events = {}
 
     def __init__(self, bot, conf):

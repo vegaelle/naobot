@@ -3,6 +3,7 @@
 import re
 import random
 
+
 class Markov():
     """Implements a basic Markov model of order 1, for generating
     funny random sentences constructed from a pool of pre-feeded
@@ -45,8 +46,14 @@ class Markov():
             words.insert(0, self.begin_word)
             words.append(self.end_word)
             for word in words[1:]:
-                self._add_relation(chan, self.dico, words[current_word-1], word)
-                self._add_relation(chan, self.backward_dico, word, words[current_word-1])
+                self._add_relation(chan,
+                                   self.dico,
+                                   words[current_word-1],
+                                   word)
+                self._add_relation(chan,
+                                   self.backward_dico,
+                                   word,
+                                   words[current_word-1])
                 current_word += 1
 
     def get_sentence(self, chan, seed=None):
@@ -116,7 +123,8 @@ class Markov():
         current_word = sentence[0]
         extension = []
         while current_word != self.begin_word:
-            current_word = self._extend_oneword(self.backward_dico[chan], current_word)
+            current_word = self._extend_oneword(self.backward_dico[chan],
+                                                current_word)
             extension.append(current_word)
         extension.reverse()
         extension.extend(sentence)

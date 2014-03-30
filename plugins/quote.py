@@ -4,6 +4,7 @@ import datetime
 import random
 from stdPlugin import stdPlugin
 
+
 class quote(stdPlugin):
     u'''Permet d’enregistrer et de répéter des phrases embarassantes..'''
 
@@ -12,7 +13,8 @@ class quote(stdPlugin):
     def __init__(self, bot, conf):
         return_val = super(quote, self).__init__(bot, conf)
         self.dico = {}
-        chans = self.bot.conf['chans'] if not self.bot.channels else self.bot.channels
+        chans = self.bot.conf['chans'] if not self.bot.channels else\
+            self.bot.channels
         for chan in chans:
             self.get_dico(chan)
         return return_val
@@ -28,14 +30,19 @@ class quote(stdPlugin):
         if not len(self.dico[chan]):
             id = 1
         else:
-            dico_index = dict((q['id'], i) for (i, q) in enumerate(self.dico[chan]))
+            dico_index = dict((q['id'], i) for (i, q) in
+                              enumerate(self.dico[chan]))
             id = max(dico_index) + 1
-        self.dico[chan].append({'id': id, 'author': author, 'quote': quote, 'date': datetime.datetime.now()})
+        self.dico[chan].append({'id': id,
+                                'author': author,
+                                'quote': quote,
+                                'date': datetime.datetime.now()})
         self.save_dico(chan)
         return id
 
     def del_quote(self, chan, id):
-        dico_index = dict((q['id'], i) for (i, q) in enumerate(self.dico[chan]))
+        dico_index = dict((q['id'], i) for (i, q) in
+                          enumerate(self.dico[chan]))
         quote_index = dico_index.get(int(id), -1)
         if quote_index == -1:
             return None
@@ -44,7 +51,8 @@ class quote(stdPlugin):
             self.save_dico(chan)
 
     def get_quote(self, chan, id):
-        dico_index = dict((q['id'], i) for (i, q) in enumerate(self.dico[chan]))
+        dico_index = dict((q['id'], i) for (i, q) in
+                          enumerate(self.dico[chan]))
         quote_index = dico_index.get(int(id), -1)
         if quote_index == -1:
             return None
@@ -52,7 +60,8 @@ class quote(stdPlugin):
             return self.dico[chan][quote_index]
 
     def search_quote(self, chan, keyword):
-        dico_index = dict((q['quote'], i) for (i, q) in enumerate(self.dico[chan]))
+        dico_index = dict((q['quote'], i) for (i, q) in
+                          enumerate(self.dico[chan]))
         quotes_id = [i for q, i in dico_index.items() if keyword in q]
         quotes = []
         for i in quotes_id:
@@ -73,11 +82,14 @@ class quote(stdPlugin):
             return False
 
     def on_cmd(self, serv, ev, command, args, helper):
-        u'''%(namespace)s <phrase> : enregistre une phrase ridicule prononcée par un membre du chan.
+        u'''%(namespace)s <phrase> : enregistre une phrase ridicule prononcée
+            par un membre du chan.
         %(namespace)s : sélectionne une phrase de la liste.
         %(namespace)s #<id> : sélectionne la phrase d’un id donné.
         %(namespace)s ?<mot-clé> : sélectionne une phrase contenant le mot-clé
-        %(namespace)s !<id> : supprime une phrase donnée (réservée aux admins)'''
+        %(namespace)s !<id> : supprime une phrase donnée (réservée aux
+            admins)
+        '''
         try:
             if not command:
                 quote = self.get_random_quote(helper['target'])
@@ -96,7 +108,8 @@ class quote(stdPlugin):
                     return self.say_quote(serv, helper['target'], None)
             elif command.startswith('!'):
                 if 'admin' in self.bot.registered_plugins:
-                    if self.bot.registered_plugins['admin'].is_admin(ev.source()):
+                    if self.bot.registered_plugins['admin'].\
+                            is_admin(ev.source()):
                         self.del_quote(helper['target'], command[1:])
                         serv.privmsg(helper['target'], u'Quote supprimée.')
                     else:
@@ -106,8 +119,9 @@ class quote(stdPlugin):
                 quote = ' '.join(args)
                 id = self.add_quote(helper['target'], quote, helper['sender'])
                 if id:
-                    serv.privmsg(helper['target'], u'Quote enregistrée ! ID %d' % id)
+                    serv.privmsg(helper['target'], u'Quote enregistrée ! ID %d'
+                                 % id)
                     return True
-        except Exception, e:
+        except Exception:
             serv.privmsg(helper['target'], u'Nope.')
         return False

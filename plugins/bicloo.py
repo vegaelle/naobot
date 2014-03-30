@@ -4,6 +4,7 @@ from stdPlugin import stdPlugin, PluginError
 from xml.etree import ElementTree
 import requests
 
+
 class bicloo(stdPlugin):
     u'''Informe sur l’état du réseau de vélos Bicloo de Nantes'''
 
@@ -11,7 +12,8 @@ class bicloo(stdPlugin):
               'privmsg': {'exclusive': True, 'command_namespace': 'bicloo'}}
 
     general_url = 'http://www.bicloo.nantesmetropole.fr/service/carto'
-    station_url = 'http://www.bicloo.nantesmetropole.fr/service/stationdetails/nantes/%d'
+    station_url = \
+        'http://www.bicloo.nantesmetropole.fr/service/stationdetails/nantes/%d'
 
     def __init__(self, *args, **kwargs):
         self.stations = {}
@@ -39,8 +41,8 @@ class bicloo(stdPlugin):
         if station['open'] == '0' or station['connected'] == '0':
             return 'Station indisponible'
         return u'Station %s (%d) : %d vélos sur %d disponibles' %\
-            (self.stations[int(id)].title(), int(id), int(station['available']), int(station['total']))
-
+            (self.stations[int(id)].title(), int(id),
+             int(station['available']), int(station['total']))
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s <ID> : Indique le statut de la station <ID>

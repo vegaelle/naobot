@@ -3,20 +3,24 @@
 from stdPlugin import stdPlugin
 from lib.markov import Markov
 
+
 class learn(stdPlugin):
-    u'''Apprend continuellement les mots utilisés sur un canal, et génère des phrases aléatoires et stupides.'''
+    u'''Apprend continuellement les mots utilisés sur un canal, et génère des
+    phrases aléatoires et stupides.
+    '''
 
     events = {'pubmsg': {'exclusive': False, 'command_namespace': 'say'},
               'privmsg': {'exclusive': False, 'command_namespace': 'say'},
               'action': {'exclusive': False},
               'join': {'exclusive': False},
               'run': {'frequency': (300, 30000)},
-             }
+              }
     markov = Markov()
 
     def __init__(self, bot, conf):
         return_val = super(learn, self).__init__(bot, conf)
-        chans = self.bot.conf['chans'] if not self.bot.channels else self.bot.channels
+        chans = self.bot.conf['chans'] if not self.bot.channels else \
+            self.bot.channels
         for chan in chans:
             self.get_dico(chan)
         return return_val
@@ -38,7 +42,7 @@ class learn(stdPlugin):
         return False
 
     def on_join(self, serv, ev, helper):
-        if helper['sender'] == serv.username: #s’il s’agit de notre propre join
+        if helper['sender'] == serv.username:  # si c’est notre propre join
             self.get_dico(helper['target'])
             return False
         else:
@@ -46,27 +50,35 @@ class learn(stdPlugin):
 
     def on_cmd(self, serv, ev, command, args, helper):
         u'''%(namespace)s sentence : génère une phrase aléatoire.
-        %(namespace)s sentence <mot> : génère une phrase aléatoire contenant le mot donné, s’il est connu.
-        %(namespace)s stats : indique le nombre de mots connus pour le canal courant'''
+        %(namespace)s sentence <mot> : génère une phrase aléatoire contenant
+            le mot donné, s’il est connu.
+        %(namespace)s stats : indique le nombre de mots connus pour le canal
+            courant'''
         if command == 'sentence':
             if len(args) == 0:
-                serv.privmsg(helper['target'], self.markov.get_sentence(helper['target']))
+                serv.privmsg(helper['target'], self.markov.
+                             get_sentence(helper['target']))
                 return True
             else:
-                serv.privmsg(helper['target'], self.markov.get_sentence(helper['target'], args[0]))
+                serv.privmsg(helper['target'], self.markov.
+                             get_sentence(helper['target'], args[0]))
                 return True
-        #elif command == 'save':
-        #    if self.save_dico(helper['target']):
-        #        serv.privmsg(helper['target'], u'Dictionnaire sauvegardé : %d mots' % self.get_stats(helper['target']))
-        #        return True
-        #    else:
-        #        serv.privmsg(helper['target'], u'Erreur lors de la sauvegarde du dictionnaire !')
-        #        return True
+        # elif command == 'save':
+        #     if self.save_dico(helper['target']):
+        #         serv.privmsg(helper['target'], u'Dictionnaire sauvegardé : '
+        #                      '%d mots' % self.get_stats(helper['target']))
+        #         return True
+        #     else:
+        #         serv.privmsg(helper['target'], u'Erreur lors de la '
+        #                       'sauvegarde du dictionnaire !')
+        #         return True
         elif command == 'stats':
-            serv.privmsg(helper['target'], u'Mot connus : %d' % self.markov.get_stats(helper['target']))
+            serv.privmsg(helper['target'], u'Mot connus : %d' % self.markov.
+                         get_stats(helper['target']))
             return True
         else:
-            serv.privmsg(helper['target'], u'Je ne connais pas cette commande.')
+            serv.privmsg(helper['target'], u'Je ne connais pas cette '
+                         'commande.')
             return True
 
     def get_dico(self, chan):
@@ -78,4 +90,5 @@ class learn(stdPlugin):
         return self.bot.write_config(self, chan, data)
 
     def on_run(self, serv, helper):
-        serv.privmsg(helper['target'], self.markov.get_sentence(helper['target']))
+        serv.privmsg(helper['target'], self.markov.
+                     get_sentence(helper['target']))

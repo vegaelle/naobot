@@ -2,6 +2,6 @@ BeautifulSoup==3.2.1
 ipdb==0.7
 ipython==0.13.1
 pyfiglet==0.6.1
-requests==0.14.2
+requests==2.2.1
 twitter==1.9.1
 wsgiref==0.1.2

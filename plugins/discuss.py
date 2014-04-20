@@ -62,12 +62,12 @@ class discuss(stdPlugin):
 
     def answer_message(self, serv, ev, helper):
         message = re.sub(serv.username, helper['sender'], helper['message'])
-        if ev.eventtype() == 'pubmsg' or ev.eventtype() == 'privmsg':
+        if ev.type == 'pubmsg' or ev.type == 'privmsg':
             serv.privmsg(helper['target'], message)
-        elif ev.eventtype() == 'action':
+        elif ev.type == 'action':
             serv.action(helper['target'], message)
         else:
-            print ev.eventtype()
+            print ev.type
         return True
 
     def on_cmd(self, serv, ev, command, args, helper):

@@ -109,7 +109,7 @@ class quote(stdPlugin):
             elif command.startswith('!'):
                 if 'admin' in self.bot.registered_plugins:
                     if self.bot.registered_plugins['admin'].\
-                            is_admin(ev.source()):
+                            is_admin(ev.source):
                         self.del_quote(helper['target'], command[1:])
                         serv.privmsg(helper['target'], u'Quote supprimée.')
                     else:

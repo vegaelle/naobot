@@ -31,7 +31,7 @@ class help(stdPlugin):
                     self.bot.registered_plugins[command], 'on_cmd')).\
                     split('\n')
                 command_namespace = self.bot.registered_plugins[command].\
-                    events[ev.eventtype()]['command_namespace']
+                    events[ev.eventtype]['command_namespace']
                 serv.privmsg(helper['target'], u'Liste des commandes :')
                 for line in command_help:
                     serv.privmsg(helper['target'], '\t\t'+line %

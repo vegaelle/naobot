@@ -1,7 +1,13 @@
 BeautifulSoup==3.2.1
+flake8==2.1.0
 ipdb==0.7
 ipython==0.13.1
+irc==8.5.4
+mccabe==0.2.1
+pep8==1.5.1
 pyfiglet==0.6.1
+pyflakes==0.8
 requests==2.2.1
+six==1.6.1
 twitter==1.9.1
 wsgiref==0.1.2

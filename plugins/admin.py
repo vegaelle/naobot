@@ -32,7 +32,7 @@ class admin(stdPlugin):
         %(namespace)s join <chan> : rejoint un canal.
         %(namespace)s leave <chan> : quitte un canal.
         %(namespace)s chans : indique la liste des canaux actifs.'''
-        if not self.is_admin(ev.source()):
+        if not self.is_admin(ev.source):
             serv.privmsg(helper['target'], u'Nope.')
             return True
         if command == 'quit':

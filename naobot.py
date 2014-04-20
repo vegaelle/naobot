@@ -9,6 +9,7 @@ import argparse
 import re
 import pickle
 import datetime
+from time import sleep
 import random
 import traceback
 # import smtplib
@@ -21,32 +22,32 @@ from irc import bot
 
 class Naobot(bot.SingleServerIRCBot):
 
-    registered_plugins = {}
-    events = {}
-
-    colors = {'white': 0,
-              'black': 1,
-              'blue': 2,
-              'green': 3,
-              'red': 4,
-              'brown': 5,
-              'purple': 6,
-              'orange': 7,
-              'yellow': 8,
-              'lightgreen': 9,
-              'teal': 10,
-              'lightcyan': 11,
-              'lightblue': 12,
-              'pink': 13,
-              'grey': 14,
-              'lightgrey': 15
-              }
     color_char = '\x03%s'
     background_color_char = '%s,%s'
     bold_char = '\x02'
     reset_char = '\x15'
 
     def __init__(self, conf, plugins_conf, config_name):
+        self.registered_plugins = {}
+        self.events = {}
+
+        self.colors = {'white': 0,
+                       'black': 1,
+                       'blue': 2,
+                       'green': 3,
+                       'red': 4,
+                       'brown': 5,
+                       'purple': 6,
+                       'orange': 7,
+                       'yellow': 8,
+                       'lightgreen': 9,
+                       'teal': 10,
+                       'lightcyan': 11,
+                       'lightblue': 12,
+                       'pink': 13,
+                       'grey': 14,
+                       'lightgrey': 15
+                       }
         self.conf = conf
         self.config_name = config_name
         bot.SingleServerIRCBot.__init__(self, self.conf['server'],
@@ -159,10 +160,10 @@ class Naobot(bot.SingleServerIRCBot):
             serv.join(c)
 
     def on_pubmsg(self, serv, ev):
-        helper = {'message': ev.arguments()[0],
-                  'sender': ev.source().split('!')[0],
-                  'chan': self.channels[ev.target()],
-                  'target': ev.target()
+        helper = {'message': ev.arguments[0],
+                  'sender': ev.source.split('!')[0],
+                  'chan': self.channels[ev.target],
+                  'target': ev.target
                   }
         try:
             if 'pubmsg' in self.events:
@@ -211,9 +212,9 @@ class Naobot(bot.SingleServerIRCBot):
             print('%s: %s' % (e.__class__.__name__, e.message))
 
     def on_privmsg(self, serv, ev):
-        helper = {'message': ev.arguments()[0],
-                  'sender': ev.source().split('!')[0],
-                  'target': ev.source().split('!')[0]
+        helper = {'message': ev.arguments[0],
+                  'sender': ev.source.split('!')[0],
+                  'target': ev.source.split('!')[0]
                   }
         try:
             if 'privmsg' in self.events:
@@ -254,13 +255,13 @@ class Naobot(bot.SingleServerIRCBot):
             print('%s: %s' % (e.__class__.__name__, e.message))
 
     def on_action(self, serv, ev):
-        helper = {'message': ev.arguments()[0],
-                  'sender': ev.source().split('!')[0],
-                  # 'chan': self.channels[ev.target()],
-                  'target': ev.target()
+        helper = {'message': ev.arguments[0],
+                  'sender': ev.source.split('!')[0],
+                  # 'chan': self.channels[ev.target],
+                  'target': ev.target
                   }
-        if ev.target() in self.channels:
-            helper['chan'] = self.channels[ev.target()]
+        if ev.target in self.channels:
+            helper['chan'] = self.channels[ev.target]
         try:
             if 'action' in self.events:
                 assert isinstance(self.events['action'], list)
@@ -274,9 +275,9 @@ class Naobot(bot.SingleServerIRCBot):
             print('%s: %s' % (e.__class__.__name__, e.message))
 
     def on_join(self, serv, ev):
-        helper = {'chan': self.channels[ev.target()],
-                  'sender': ev.source().split('!')[0],
-                  'target': ev.target()
+        helper = {'chan': self.channels[ev.target],
+                  'sender': ev.source.split('!')[0],
+                  'target': ev.target
                   }
         try:
             if 'join' in self.events:
@@ -291,11 +292,11 @@ class Naobot(bot.SingleServerIRCBot):
             print('%s: %s' % (e.__class__.__name__, e.message))
 
     def on_kick(self, serv, ev):
-        helper = {'victim': ev.arguments()[0],
-                  'message': ev.arguments()[1],
-                  'sender': ev.source().split('!')[0],
-                  'chan': self.channels[ev.target()],
-                  'target': ev.target(),
+        helper = {'victim': ev.arguments[0],
+                  'message': ev.arguments[1],
+                  'sender': ev.source.split('!')[0],
+                  'chan': self.channels[ev.target],
+                  'target': ev.target,
                   }
         try:
             if 'kick' in self.events:
@@ -416,34 +417,44 @@ if __name__ == '__main__':
         else:
             os._exit(0)
 
-    try:
-        exec('from settings.%s import conf, plugins_conf' %
-             results.config_file)
-        conf = getattr(sys.modules['settings.%s' % results.config_file],
-                       'conf')
-        plugins_conf = getattr(sys.modules['settings.%s' %
-                               results.config_file], 'plugins_conf')
+    while True:
+        try:
+            exec('from settings.%s import conf, plugins_conf' %
+                 results.config_file)
+            conf = getattr(sys.modules['settings.%s' % results.config_file],
+                           'conf')
+            plugins_conf = getattr(sys.modules['settings.%s' %
+                                   results.config_file], 'plugins_conf')
 
-        Naobot(conf,
-               plugins_conf,
-               results.config_file).start()
-    except Exception as e:
-        # sending mail backtrace
-        now = datetime.datetime.now()
-        mail_subject = 'Fatal exception on Naobot %s!' % results.config_file
-        mail_content = '[%s] %s\n\n' % (str(now), e.message)
-        mail_content += traceback.format_exc()
-        msg = MIMEText(mail_content)
-        msg['Subject'] = mail_subject
-        msg['From'] = 'Naobot <naobot@localhost>'
-        msg['To'] = conf['admin_mail']
+            running_bot = Naobot(conf,
+                                 plugins_conf,
+                                 results.config_file)
+            running_bot.start()
+        except KeyboardInterrupt as e:
+            sys.exit(1)
+        except Exception as e:
+            try:
+                running_bot.disconnect()
+            except Exception as e:
+                pass
+            # sending mail backtrace
+            now = datetime.datetime.now()
+            mail_subject = 'Fatal exception on Naobot %s!' % \
+                results.config_file
+            mail_content = '[%s] %s\n\n' % (str(now), e.message)
+            mail_content += traceback.format_exc()
+            msg = MIMEText(mail_content)
+            msg['Subject'] = mail_subject
+            msg['From'] = 'Naobot <naobot@localhost>'
+            msg['To'] = conf['admin_mail']
 
-        # s = smtplib.SMTP('localhost')
-        # s.sendmail(msg['From'], [conf['admin_mail']], msg.as_string())
-        # s.quit()
+            # s = smtplib.SMTP('localhost')
+            # s.sendmail(msg['From'], [conf['admin_mail']], msg.as_string())
+            # s.quit()
 
-        if results.daemon:
-            p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
-            p.communicate(msg.as_string())
-        else:
-            print(mail_content)
+            if results.daemon:
+                p = Popen(["/usr/sbin/sendmail", "-t"], stdin=PIPE)
+                p.communicate(msg.as_string())
+            else:
+                print(mail_content)
+            sleep(10)  # waiting for 10 seconds before we start again

@@ -14,7 +14,7 @@ class admin(stdPlugin):
               }
 
     def is_admin(self, nick):
-        sender = nick.split('!')[0]
+        sender = nick.nick
         if sender in self.conf['admins']:
             return True
         else:
@@ -95,7 +95,10 @@ class admin(stdPlugin):
                 chan_name = '#%s' % chan_name
             result = serv.join(chan_name)
         elif command == 'leave':
-            chan_name = args.pop(0)
+            if length(args) == 0:
+                chan_name = helper['target']
+            else:
+                chan_name = args.pop(0)
             reason = ' '.join(args)
             if not chan_name.startswith('#'):
                 chan_name = '#%s' % chan_name

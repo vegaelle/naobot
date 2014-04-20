@@ -28,7 +28,7 @@ class url(stdPlugin):
                     else:
                         str_line = ''
                         req = requests.head(url, verify=False,
-                                            allow_redirects=True)
+                                            allow_redirects=True, stream=True)
                         if req.url != url and req.url+'/' != url:
                             str_line += u'%s ' % req.url
                         content_type = req.headers['content-type'].\

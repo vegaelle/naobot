@@ -49,6 +49,7 @@ class Naobot(bot.SingleServerIRCBot):
                        'lightgrey': 15
                        }
         self.conf = conf
+        self.chan_list = set(conf['chans'])
         self.config_name = config_name
         bot.SingleServerIRCBot.__init__(self, self.conf['server'],
                                         self.conf['nick'],
@@ -131,7 +132,7 @@ class Naobot(bot.SingleServerIRCBot):
                 else:
                     self.events[e_name].insert(int(priority), e_values)
             if e_name == 'run':
-                for chan_name in self.conf['chans']:
+                for chan_name in self.chan_list:
                     if chan_name not in self.runs:
                         self.runs[chan_name] = {}
                     if isinstance(e_values['frequency'], tuple):
@@ -156,12 +157,12 @@ class Naobot(bot.SingleServerIRCBot):
                          self.conf['password'])
         except KeyError as e:
             print('%s: %s' % (e.__class__.__name__, e.message))
-        for c in self.conf['chans']:
+        for c in self.chan_list:
             serv.join(c)
 
     def on_pubmsg(self, serv, ev):
         helper = {'message': ev.arguments[0],
-                  'sender': ev.source.split('!')[0],
+                  'sender': ev.source.nick,
                   'chan': self.channels[ev.target],
                   'target': ev.target
                   }
@@ -213,8 +214,8 @@ class Naobot(bot.SingleServerIRCBot):
 
     def on_privmsg(self, serv, ev):
         helper = {'message': ev.arguments[0],
-                  'sender': ev.source.split('!')[0],
-                  'target': ev.source.split('!')[0]
+                  'sender': ev.source.nick,
+                  'target': ev.source.nick
                   }
         try:
             if 'privmsg' in self.events:
@@ -256,7 +257,7 @@ class Naobot(bot.SingleServerIRCBot):
 
     def on_action(self, serv, ev):
         helper = {'message': ev.arguments[0],
-                  'sender': ev.source.split('!')[0],
+                  'sender': ev.source.nick,
                   # 'chan': self.channels[ev.target],
                   'target': ev.target
                   }
@@ -275,8 +276,12 @@ class Naobot(bot.SingleServerIRCBot):
             print('%s: %s' % (e.__class__.__name__, e.message))
 
     def on_join(self, serv, ev):
+        # updating self.chan_list
+        if ev.source.nick == serv.get_nickname():
+            self.chan_list.add(ev.target)
+
         helper = {'chan': self.channels[ev.target],
-                  'sender': ev.source.split('!')[0],
+                  'sender': ev.source.nick,
                   'target': ev.target
                   }
         try:
@@ -292,23 +297,27 @@ class Naobot(bot.SingleServerIRCBot):
             print('%s: %s' % (e.__class__.__name__, e.message))
 
     def on_kick(self, serv, ev):
-        helper = {'victim': ev.arguments[0],
-                  'message': ev.arguments[1],
-                  'sender': ev.source.split('!')[0],
-                  'chan': self.channels[ev.target],
-                  'target': ev.target,
-                  }
-        try:
-            if 'kick' in self.events:
-                assert isinstance(self.events['kick'], list)
-                answered = False
-                for plugin_event in self.events['kick']:
-                    if not plugin_event['exclusive'] or not answered:
-                        answered = answered or \
-                            self.registered_plugins[plugin_event['plugin']].\
-                            on_kick(serv, ev, helper)
-        except Exception as e:
-            print('%s: %s' % (e.__class__.__name__, e.message))
+        # updating self.chan_list
+        if ev.arguments[0] == serv.get_nickname():
+            self.chan_list.remove(ev.target)
+        else:
+            helper = {'victim': ev.arguments[0],
+                      'message': ev.arguments[1],
+                      'sender': ev.source.nick,
+                      'chan': self.channels[ev.target],
+                      'target': ev.target,
+                      }
+            try:
+                if 'kick' in self.events:
+                    assert isinstance(self.events['kick'], list)
+                    answered = False
+                    for plugin_event in self.events['kick']:
+                        if not plugin_event['exclusive'] or not answered:
+                            answered = answered or \
+                                self.registered_plugins[plugin_event['plugin']].\
+                                on_kick(serv, ev, helper)
+            except Exception as e:
+                print('%s: %s' % (e.__class__.__name__, e.message))
 
     def on_run(self, serv, ev):
         for chan_name, chan in self.channels.items():

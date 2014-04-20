@@ -37,6 +37,7 @@ class admin(stdPlugin):
             return True
         if command == 'quit':
             self.bot.die()
+            sys.exit(0)
             return True
         elif command == 'list':
             plugin_list = ', '.join(self.bot.registered_plugins.keys())

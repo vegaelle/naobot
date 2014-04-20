@@ -34,8 +34,9 @@ class url(stdPlugin):
                         content_type = req.headers['content-type'].\
                             split(';')[0].lower()
                         if content_type == 'text/html':
-                            req = requests.get(url, verify=False)
-                            soup = BeautifulSoup(req.content)
+                            req = requests.get(url, verify=False, stream=True)
+                            req = req.iter_content(4096).next()
+                            soup = BeautifulSoup(req)
                             title = soup.find('title')
                             if not title:
                                 str_line += u'Page HTML sans titre'

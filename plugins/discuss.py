@@ -86,6 +86,7 @@ class discuss(stdPlugin):
                                       u'Ohai %(chan)s o/',
                                       u'Faites comme si j’étais pas là.',
                                       u'De toutes façons, il meurt à la fin.',
+                                      u'’Matin !',
                                       ],
                           'kick': [u'Bon débarras.',
                                    u'J’en avais marre de %(victim)s de toutes '

@@ -78,10 +78,11 @@ class discuss(stdPlugin):
     def __init__(self, bot, conf):
         # déclaration des différentes phrases
         self.sentences = {'mention': [u'/me mange %(nick)s',
-                                      u'Hein ?',
-                                      self.answer_message,
-                                      u'Ho, ta gueule %(nick)s',
-                                      ],
+                                      u'Hein ?',
+                                       self.answer_message,
+                                       u'Ho, ta gueule %(nick)s',
++                                      u'Je suis ton père %(nick)s',
+                                       ],
                           'joining': [u'Coucou, tu veux voir mon bit ?',
                                       u'Ohai %(chan)s o/',
                                       u'Faites comme si j’étais pas là.',

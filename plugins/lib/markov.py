@@ -20,21 +20,18 @@ class Markov():
     blacklist = set()
 
     def default_data(self):
-        return ({}, {})
+        return {'forward': {}, 'backward': {}}
 
     def load(self, chan, data):
         """Loads data, coming from instance from a pickled file."""
         # Compatibility with older versions
-        if isinstance(data, dict):
-            self.dico[chan] = data
-            self.backward_dico[chan] = self._build_backward_dico(chan)
-        else:
-            self.dico[chan] = data[0]
-            self.backward_dico[chan] = data[1]
+        self.dico[chan] = data['forward']
+        self.backward_dico[chan] = data['backward']
 
     def dump(self, chan):
         """Dumps the internal dictionary, for instance to be fed to pickle."""
-        return (self.dico[chan], self.backward_dico[chan])
+        return {'forward': self.dico[chan],
+                'backward': self.backward_dico[chan]}
 
     def add_sentence(self, chan, sentence):
         """Feed a sentence to the Markov engine."""

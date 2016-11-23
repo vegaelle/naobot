@@ -75,19 +75,16 @@ class Learn:
             if random.randint(1, 100) < 10:
                 self.bot.privmsg(chan, self.markov.
                                  get_sentence(chan))
-            self.bot.write_config(chan, self.bot.get_config(chan))
 
     @irc3.extend
     def write_config(self, target, data):
         if 'learn' not in self.bot.db:
-            self.bot.db['learn'] = {}
-        self.bot.db['learn'][target] = data
+            self.bot.db['learn.{}'.format(target)] = {}
+        self.bot.db['learn.{}'.format(target)] = data
 
     @irc3.extend
     def get_config(self, target, default=None):
-        if 'learn' not in self.bot.db:
+        if 'learn.{}'.format(target) not in self.bot.db:
             return default if default is not None else {}
         else:
-            if target not in self.bot.db['learn']:
-                return default if default is not None else {}
-            return self.bot.db['learn'][target]
+            return self.bot.db['learn.{}'.format(target)]

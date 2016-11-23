@@ -2,7 +2,8 @@
 
 import re
 
-from stdPlugin import stdPlugin
+from irc3.plugins.command import command
+import irc3
 
 # From http://stackoverflow.com/a/3009124
 
@@ -16,7 +17,8 @@ def case_sensitive_replace(s, before, after):
                                        for c, d in zip(x.group(), after)), s)
 
 
-class autopan(stdPlugin):
+@irc3.plugin
+class Autopan:
     u'''Réagit pragmatiquement aux invasions palmipèdes sur les canaux.'''
 
     events = {'pubmsg': {'exclusive': True},
@@ -34,8 +36,12 @@ class autopan(stdPlugin):
         ('n10c', 'n4p'),
         )
 
-    def on_pubmsg(self, serv, ev, helper):
-        words = re.findall(r"[\w'<>/\\-]+", helper['message'], re.U)
+    def __init__(self, bot):
+        self.bot = bot
+
+    @irc3.event(irc3.rfc.PRIVMSG)
+    def on_privmsg(self, mask=None, event=None, target=None, data=None, **kw):
+        words = re.findall(r"[\w'<>/\\-]+", data, re.U)
         output = []
         for w in words:
             tmp = w
@@ -46,9 +52,4 @@ class autopan(stdPlugin):
                 output.append(tmp)
         # Print all those words
         if len(output) > 0:
-            serv.privmsg(helper['target'], ' '.join(output))
-            return True
-        return False
-
-    def on_action(self, serv, ev, helper):
-        return self.on_pubmsg(serv, ev, helper)
+            self.bot.privmsg(target, ' '.join(output))

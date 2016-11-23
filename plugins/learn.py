@@ -81,7 +81,7 @@ class Learn:
     def write_config(self, target, data):
         if 'learn' not in self.bot.db:
             self.bot.db['learn'] = {}
-            self.bot.db['learn'][target] = data
+        self.bot.db['learn'][target] = data
 
     @irc3.extend
     def get_config(self, target, default=None):

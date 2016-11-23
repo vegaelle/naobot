@@ -31,6 +31,10 @@ class Learn:
         if not data.startswith(self.bot.config.get('irc3.plugins.command', {})
                                .get('cmd', '!')):
             self.parse(target, data)
+            if self.bot.nick in data:
+                self.bot.privmsg(target, self.markov.
+                                 get_sentence(target, mask.nick,
+                                              can_ignore=True))
 
     @irc3.event(irc3.rfc.JOIN)
     def on_join(self, mask, channel, **kwargs):

@@ -53,7 +53,7 @@ class Markov():
                                    words[current_word-1])
                 current_word += 1
 
-    def get_sentence(self, chan, seed=None):
+    def get_sentence(self, chan, seed=None, can_ignore=False):
         """Build a sentence from the graph of learned words. If a seed
         (single word for now) is provided, we try to build a sentence
         including it."""
@@ -62,7 +62,10 @@ class Markov():
         else:
             seed = self._get_key_nocase(seed, self.dico[chan])
             if seed is None:
-                return 'Je ne connais pas ce mot.'
+                if can_ignore:
+                    seed = self.begin_word
+                else:
+                    return 'Je ne connais pas ce mot.'
         # Build the start of the sentence (backward from seed).
         sentence = self._extend_backward(chan, [seed])
         # Build the end of the sentence (forward).

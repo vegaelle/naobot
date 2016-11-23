@@ -9,6 +9,9 @@ import irc3
 
 from .lib.markov import Markov
 
+URL_RE = r'\b(([\w-]+://?|www[.])[^\s()<>]+(?:\([\w\d]+\)|'\
+    '([^[:punct:]\s]|/)))'
+
 
 @irc3.plugin
 class Learn:
@@ -25,7 +28,7 @@ class Learn:
 
     def parse(self, chan, message):
         # stripping URLs
-        message = re.sub(r'^https?:\/\/.*[\r\n]*', '', message)
+        message = re.sub(URL_RE, '', message)
         self.markov.add_sentence(chan, message)
         self.save_dico(chan)
 

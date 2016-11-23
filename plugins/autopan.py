@@ -21,9 +21,6 @@ def case_sensitive_replace(s, before, after):
 class Autopan:
     u'''Réagit pragmatiquement aux invasions palmipèdes sur les canaux.'''
 
-    events = {'pubmsg': {'exclusive': True},
-              'action': {'exclusive': True}}
-
     targets = (
         # Must not overlap
         ('coin', 'pan'),

@@ -27,7 +27,7 @@ class Markov():
         # Compatibility with older versions
         if isinstance(data, dict):
             self.dico[chan] = data
-            self.backward_dico[chan] = self.build_backward_dico(chan)
+            self.backward_dico[chan] = self._build_backward_dico(chan)
         else:
             self.dico[chan] = data[0]
             self.backward_dico[chan] = data[1]

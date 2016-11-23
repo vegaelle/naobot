@@ -1,94 +1,91 @@
 # -*- coding: utf-8 -*-
 
-from stdPlugin import stdPlugin
-from lib.markov import Markov
+import random
+
+from irc3.plugins.command import command
+from irc3.plugins.cron import cron
+import irc3
+
+from .lib.markov import Markov
 
 
-class learn(stdPlugin):
-    u'''Apprend continuellement les mots utilisés sur un canal, et génère des
+@irc3.plugin
+class Learn:
+    """Apprend continuellement les mots utilisés sur un canal, et génère des
     phrases aléatoires et stupides.
-    '''
+    """
 
-    events = {'pubmsg': {'exclusive': False, 'command_namespace': 'say'},
-              'privmsg': {'exclusive': False, 'command_namespace': 'say'},
-              'action': {'exclusive': False},
-              'join': {'exclusive': False},
-              'run': {'frequency': (300, 30000)},
-              }
     markov = Markov()
 
-    def __init__(self, bot, conf):
-        return_val = super(learn, self).__init__(bot, conf)
-        chans = self.bot.conf['chans'] if not self.bot.channels else \
-            self.bot.channels
-        for chan in chans:
+    def __init__(self, bot):
+        self.bot = bot
+        for chan in self.bot.channels:
             self.get_dico(chan)
-        return return_val
 
     def parse(self, chan, message):
         self.markov.add_sentence(chan, message)
         self.save_dico(chan)
 
-    def on_pubmsg(self, serv, ev, helper):
-        self.parse(helper['target'], helper['message'])
-        return False
+    @irc3.event(irc3.rfc.PRIVMSG)
+    def on_privmsg(self, mask=None, event=None, target=None, data=None, **kw):
+        if not data.startswith(self.bot.config.get('irc3.plugins.command', {})
+                               .get('cmd', '!')):
+            self.parse(target, data)
 
-    def on_privmsg(self, serv, ev, helper):
-        self.parse(helper['target'], helper['message'])
-        return False
+    @irc3.event(irc3.rfc.JOIN)
+    def on_join(self, mask, channel, **kwargs):
+        if mask.nick == self.bot.nick:
+            self.get_dico(channel)
 
-    def on_action(self, serv, ev, helper):
-        self.parse(helper['target'], helper['message'])
-        return False
+    @command(permission='view')
+    def sentence(self, mask, target, args):
+        """Sentence : génère une phrase aléatoire
 
-    def on_join(self, serv, ev, helper):
-        if helper['sender'] == serv.username:  # si c’est notre propre join
-            self.get_dico(helper['target'])
-            return False
+            %%sentence [<mot>...]
+        """
+        if len(args['<mot>']) == 0:
+            self.bot.privmsg(target,
+                             self.markov.get_sentence(target))
         else:
-            return False
+            self.bot.privmsg(target,
+                             self.markov.get_sentence(target,
+                                                      ' '.join(args['<mot>'])))
 
-    def on_cmd(self, serv, ev, command, args, helper):
-        u'''%(namespace)s sentence : génère une phrase aléatoire.
-        %(namespace)s sentence <mot> : génère une phrase aléatoire contenant
-            le mot donné, s’il est connu.
-        %(namespace)s stats : indique le nombre de mots connus pour le canal
-            courant'''
-        if command == 'sentence':
-            if len(args) == 0:
-                serv.privmsg(helper['target'], self.markov.
-                             get_sentence(helper['target']))
-                return True
-            else:
-                serv.privmsg(helper['target'], self.markov.
-                             get_sentence(helper['target'], args[0]))
-                return True
-        # elif command == 'save':
-        #     if self.save_dico(helper['target']):
-        #         serv.privmsg(helper['target'], u'Dictionnaire sauvegardé : '
-        #                      '%d mots' % self.get_stats(helper['target']))
-        #         return True
-        #     else:
-        #         serv.privmsg(helper['target'], u'Erreur lors de la '
-        #                       'sauvegarde du dictionnaire !')
-        #         return True
-        elif command == 'stats':
-            serv.privmsg(helper['target'], u'Mot connus : %d' % self.markov.
-                         get_stats(helper['target']))
-            return True
-        else:
-            serv.privmsg(helper['target'], u'Je ne connais pas cette '
-                         'commande.')
-            return True
+    @command(permission='view')
+    def stats(self, mask, target, args):
+        """Stats : donne la taille du dictionnaire
+
+            %%stats
+        """
+        self.bot.privmsg(target, 'Mot connus : %d'
+                         % self.markov.get_stats(target))
 
     def get_dico(self, chan):
-        data = self.bot.get_config(self, chan, self.markov.default_data())
+        data = self.bot.get_config(chan, self.markov.default_data())
         self.markov.load(chan, data)
 
     def save_dico(self, chan):
         data = self.markov.dump(chan)
-        return self.bot.write_config(self, chan, data)
+        return self.bot.write_config(chan, data)
 
-    def on_run(self, serv, helper):
-        serv.privmsg(helper['target'], self.markov.
-                     get_sentence(helper['target']))
+    @cron('* * * * *')
+    @irc3.asyncio.coroutine
+    def on_run(self):
+        for chan in self.bot.channels:
+            if random.randint(1, 100) < 10:
+                self.bot.privmsg(chan, self.markov.
+                                 get_sentence(chan))
+            self.bot.write_config(chan, self.bot.get_config(chan))
+
+    @irc3.extend
+    def write_config(self, target, data):
+        if 'learn' not in self.bot.db:
+            self.bot.db['learn'] = {}
+            self.bot.db['learn'][target] = data
+
+    @irc3.extend
+    def get_config(self, target, default=None):
+        if 'learn' not in self.bot.db:
+            return default if default is not None else {}
+        else:
+            return self.bot.db['learn'][target]

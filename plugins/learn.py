@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import random
+import re
 
 from irc3.plugins.command import command
 from irc3.plugins.cron import cron
@@ -23,6 +24,8 @@ class Learn:
             self.get_dico(chan)
 
     def parse(self, chan, message):
+        # stripping URLs
+        message = re.sub(r'^https?:\/\/.*[\r\n]*', '', message)
         self.markov.add_sentence(chan, message)
         self.save_dico(chan)
 

@@ -88,4 +88,6 @@ class Learn:
         if 'learn' not in self.bot.db:
             return default if default is not None else {}
         else:
+            if target not in self.bot.db['learn']:
+                return default if default is not None else {}
             return self.bot.db['learn'][target]

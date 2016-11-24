@@ -26,6 +26,11 @@ class Learn:
 
     def __init__(self, bot):
         self.bot = bot
+        self.quiet_chans = []
+        if 'plugins.learn' in self.bot.config and 'quiet_channels' in\
+                self.bot.config['plugins.learn']:
+            self.quiet_chans = self.bot\
+                .config['plugins.learn']['quiet_channels']
         for chan in self.bot.channels:
             self.get_dico(chan)
 
@@ -37,13 +42,15 @@ class Learn:
 
     @irc3.event(irc3.rfc.PRIVMSG)
     def on_privmsg(self, mask=None, event=None, target=None, data=None, **kw):
-        if not data.startswith(self.bot.config.get('irc3.plugins.command', {})
-                               .get('cmd', '!')):
-            self.parse(target, data)
-            if self.bot.nick in data:
-                self.bot.privmsg(target, self.markov.
-                                 get_sentence(target, mask.nick,
-                                              can_ignore=True))
+        if target not in self.quiet_chans:
+            if not data.startswith(
+                    self.bot.config.get('irc3.plugins.command', {})
+                        .get('cmd', '!')):
+                self.parse(target, data)
+                if self.bot.nick in data:
+                    self.bot.privmsg(target, self.markov.
+                                     get_sentence(target, mask.nick,
+                                                  can_ignore=True))
 
     @irc3.event(irc3.rfc.JOIN)
     def on_join(self, mask, channel, **kwargs):
@@ -84,7 +91,9 @@ class Learn:
     @cron('* * * * *')
     @irc3.asyncio.coroutine
     def on_run(self):
-        for chan in self.bot.channels:
+        nonquiet_chans = [c for c in self.bot.channels if c not in
+                          self.quiet_chans]
+        for chan in nonquiet_chans:
             if random.randint(1, 100) < 10:
                 self.bot.privmsg(chan, self.markov.
                                  get_sentence(chan))

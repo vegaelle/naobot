@@ -33,6 +33,7 @@ class Learn:
                 .config['plugins.learn']['quiet_channels']
         for chan in self.bot.channels:
             self.get_dico(chan)
+            self.is_last_speaker[chan] = False
 
     def parse(self, chan, message):
         # stripping URLs
@@ -51,11 +52,15 @@ class Learn:
                     self.bot.privmsg(target, self.markov.
                                      get_sentence(target, mask.nick,
                                                   can_ignore=True))
+                    self.is_last_speaker[target] = True
+                else:
+                    self.is_last_speaker[target] = False
 
     @irc3.event(irc3.rfc.JOIN)
     def on_join(self, mask, channel, **kwargs):
         if mask.nick == self.bot.nick:
             self.get_dico(channel)
+            self.is_last_speaker[channel] = False
 
     @command(permission='view')
     def sentence(self, mask, target, args):
@@ -70,6 +75,7 @@ class Learn:
             self.bot.privmsg(target,
                              self.markov.get_sentence(target,
                                                       ' '.join(args['<mot>'])))
+        self.is_last_speaker[target] = True
 
     @command(permission='view')
     def stats(self, mask, target, args):
@@ -94,9 +100,10 @@ class Learn:
         nonquiet_chans = [c for c in self.bot.channels if c not in
                           self.quiet_chans]
         for chan in nonquiet_chans:
-            if random.randint(1, 100) < 10:
+            if not self.is_last_speaker[chan] and random.randint(1, 100) < 10:
                 self.bot.privmsg(chan, self.markov.
                                  get_sentence(chan))
+                self.is_last_speaker[chan] = True
 
     @irc3.extend
     def write_config(self, target, data):

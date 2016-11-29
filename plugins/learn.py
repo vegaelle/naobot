@@ -45,9 +45,10 @@ class Learn:
     @irc3.event(irc3.rfc.PRIVMSG)
     def on_privmsg(self, mask=None, event=None, target=None, data=None, **kw):
         if target not in self.quiet_chans:
-            if not data.startswith(
-                    self.bot.config.get('irc3.plugins.command', {})
-                        .get('cmd', '!')):
+            command_char = self.bot.config.get('irc3.plugins.command', {})\
+                .get('cmd', '!')
+            if not data.startswith(command_char)\
+                    and mask.nick != self.bot.nick:
                 self.parse(target, data)
                 if self.bot.nick in data:
                     self.bot.privmsg(target, self.markov.

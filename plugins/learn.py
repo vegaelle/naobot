@@ -27,6 +27,7 @@ class Learn:
     def __init__(self, bot):
         self.bot = bot
         self.quiet_chans = []
+        self.is_last_speaker = {}
         if 'plugins.learn' in self.bot.config and 'quiet_channels' in\
                 self.bot.config['plugins.learn']:
             self.quiet_chans = self.bot\
